@@ -28,3 +28,14 @@ class Dislike(models.Model):
 
     def __str__(self):
         return f"{self.user} dislikes {self.post}"
+
+
+class Comment(models.Model):
+    content = models.TextField(max_length=254)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
+    parent = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.content[:50]

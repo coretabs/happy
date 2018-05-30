@@ -15,9 +15,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
-
+from fun.routers import router
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
-    path('api/',include('fun.urls')),
-]
+    path(r'api/v1/', include((router.urls,'apiv1'), namespace='apiv1')),
+    ]

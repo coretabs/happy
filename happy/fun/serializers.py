@@ -5,7 +5,6 @@ from . import models
 from django.contrib.auth.models import User
 
 
-
 class ProfileSerializer(serializers.ModelSerializer):
     """a serializer for our user profile objects"""
 
@@ -18,6 +17,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
 
+    #posts = serializers.PrimaryKeyRelatedField(many=True,queryset=models.Post.objects.all())
     profile = ProfileSerializer(read_only=True)
 
     class Meta:
@@ -26,11 +26,42 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password':{'write_only': True},}
 
 
-        #def create(self, validated_data):
-#
- #           user_data = validated_data.pop('user')
-  #          user = UserSerializer.create(UserSerializer(), validated_data=user_data)
-   #         user, created = User.objects.update_or_create(user=user,
-    #                                                                subject_major=validated_data.pop('subject_major'))
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        extra_kwargs={
+            #
+        }
+        fields=(
+            'id',
+            'content',
+            'author',
+            'parent',
+            'created',
+            'modified',
+        )
+        model=models.Comment
 
-     #       return user
+
+class PostSerializer(serializers.ModelSerializer):
+    author = serializers.ReadOnlyField(source='author.username')
+    comments = serializers.HyperlinkedRelatedField(many=True, read_only=True,view_name='apiv1:comment-detail')
+    class Meta:
+        extra_kwargs={
+            #
+        }
+        fields=(
+            'id',
+            'content',
+            'created',
+            'modified',
+            'author',
+            'comments',
+        )
+        model=models.Post
+
+#class UserSerializer(serializers.ModelSerializer):
+ #   posts=serializers.PrimaryKeyRelatedField(many=True,queryset=models.Post.objects.all())
+#
+ #   class Meta:
+  #      fields=('id','username','posts')
+   #     model=User

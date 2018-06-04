@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'accounts',
 ]
 
-AUTH_USER_MODEL = 'accounts.CustomUser'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -138,3 +137,9 @@ REST_FRAMEWORK = {
     )
 }
 
+#
+AUTH_USER_MODEL = 'accounts.CustomUser'
+
+LOGIN_REDIRECT_URL = 'home'
+
+LOGOUT_REDIRECT_URL = 'home'

@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     #'rest_framework.authtoken',
     'fun',
+    'posts',
 ]
 
 MIDDLEWARE = [
@@ -132,4 +133,3 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     )
 }
-

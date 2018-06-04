@@ -1,11 +1,18 @@
 from rest_framework import routers
-from . import views
+from .views import UserViewSet, ProfileViewSet  # , CommentViewSet
+from posts.views import PostViewSet  # ,LikeViewSet, DislikeViewSet
+# from posts.routers import postrouter
 
 router = routers.DefaultRouter()
-router.register(r'posts', views.PostViewSet)
-router.register(r'comments', views.CommentViewSet)
-router.register('profiles', views.ProfileViewSet)
-router.register('users', views.UserViewSet)
+router.register(r'posts', PostViewSet)
+
+# router.register(r'likes', LikeViewSet)
+# router.register(r'dislikes', DislikeViewSet)
+# router.register(r'comments', CommentViewSet)
+
+router.register('profiles', ProfileViewSet)
+router.register('users', UserViewSet)
+
 """
 urls:
 api/v1/posts/
@@ -13,5 +20,4 @@ api/v1/posts/<id>
 api/v1/posts/<id>/comments
 api/v1/comments/
 api/v1/comments/<id>
-
 """

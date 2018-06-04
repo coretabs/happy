@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Profile, Comment
+from .models import Profile
 from django.contrib.auth.models import User
 
 
@@ -30,19 +30,6 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True},
                         'posts': {'read_only': True}}
 
-
-class CommentSerializer(serializers.ModelSerializer):
-    class Meta:
-        extra_kwargs = {}
-        fields = (
-            'id',
-            'content',
-            'author',
-            'parent',
-            'created',
-            'modified',
-        )
-        model = Comment
 
 # class UserSerializer(serializers.ModelSerializer):
 #     posts=serializers.PrimaryKeyRelatedField(many=True,queryset=models.Post.objects.all())

@@ -5,9 +5,9 @@ from posts.serializers import PostSerializer
 from posts.models import Post
 from rest_framework import permissions
 
-from .models import Comment, User, Profile
+from .models import User, Profile
 
-from .serializers import CommentSerializer, UserSerializer, ProfileSerializer
+from .serializers import UserSerializer, ProfileSerializer
 
 from django.contrib.auth.models import User
 
@@ -35,8 +35,3 @@ class UserViewSet(viewsets.ModelViewSet):
         context = {'request': request}
         serializer = PostSerializer(posts, context=context, many=True)
         return Response(serializer.data)
-
-
-class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer

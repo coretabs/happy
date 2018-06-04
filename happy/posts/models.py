@@ -20,12 +20,10 @@ class Like(models.Model):
                              on_delete=models.CASCADE,
                              related_name="likes"
                              )
-
     post = models.ForeignKey(Post,
                              on_delete=models.CASCADE,
                              related_name="likes"
                              )
-
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -37,12 +35,10 @@ class Dislike(models.Model):
                              on_delete=models.CASCADE,
                              related_name="dislikes"
                              )
-
     post = models.ForeignKey(Post,
                              on_delete=models.CASCADE,
                              related_name="dislikes"
                              )
-
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

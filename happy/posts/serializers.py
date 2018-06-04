@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Post, Like, Dislike
-from fun.models import Comment
+from comments.models import Comment
 
 
 class PostSerializer(serializers.ModelSerializer):

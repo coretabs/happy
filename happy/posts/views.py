@@ -6,8 +6,8 @@ from rest_framework.decorators import action
 from rest_framework import permissions
 from .models import Post, Like, Dislike
 from .serializers import PostSerializer, LikeSerializer, DislikeSerializer
-from fun.models import Comment
-from fun.serializers import CommentSerializer
+from comments.models import Comment
+from comments.serializers import CommentSerializer
 # Create your views here.
 
 

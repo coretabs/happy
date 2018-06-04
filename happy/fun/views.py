@@ -5,10 +5,9 @@ from rest_framework import permissions
 
 from .models import Profile
 from .serializers import PostSerializer, CommentSerializer, UserSerializer, ProfileSerializer
+from accounts.models import CustomUser as User
+#from django.contrib.auth.models import User
 
-from django.contrib.auth.models import User
-
-# Create your views here.
 
 
 class ProfileViewSet(viewsets.ModelViewSet):
@@ -22,7 +21,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 from fun.permissions import IsOwnerOrReadOnly
-from .models import Post, Comment, User
+from .models import Post, Comment
 
 
 class PostViewSet(viewsets.ModelViewSet):

@@ -12,6 +12,9 @@ venv
 #vscode config
 .vscode
 
+#bash scripts
+*.sh
+
 # Distribution / packaging
 .Python
 build/

@@ -1,12 +1,13 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import action
+from posts.serializers import PostSerializer
+from posts.models import Post
 from rest_framework import permissions
 
-from .models import Profile
-from .serializers import PostSerializer, CommentSerializer, UserSerializer, ProfileSerializer
-from accounts.models import CustomUser as User
-#from django.contrib.auth.models import User
+from .models import User, Profile
+
+from .serializers import UserSerializer, ProfileSerializer
 
 
 
@@ -19,28 +20,15 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
 
-
-from fun.permissions import IsOwnerOrReadOnly
-from .models import Post, Comment
-
-
-class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
-                        IsOwnerOrReadOnly,)
-
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
-           
-    @detail_route(methods=['get'])
-    def comments(self, request, pk=None):
-        reviews = Comment.objects.filter(parent_id=pk)
-        serializer = CommentSerializer(reviews, many=True)
+    @action(detail=True, methods=['get'])
+    def profile(self, request, pk=None):
+        profile = Profile.objects.filter(user_id=pk)
+        serializer = ProfileSerializer(profile, many=True)
         return Response(serializer.data)
 
-
-class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
-
+    @action(detail=True, methods=['get'])
+    def posts(self, request, pk=None):
+        posts = Post.objects.filter(author_id=pk)
+        context = {'request': request}
+        serializer = PostSerializer(posts, context=context, many=True)
+        return Response(serializer.data)

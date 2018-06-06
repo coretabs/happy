@@ -5,7 +5,7 @@ from posts.serializers import PostSerializer
 from posts.models import Post
 from rest_framework import permissions
 
-from .models import User, Profile
+from accounts.models import CustomUser, Profile
 
 from .serializers import UserSerializer, ProfileSerializer
 
@@ -18,7 +18,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
 
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
-    queryset = User.objects.all()
+    queryset = CustomUser.objects.all()
 
     @action(detail=True, methods=['get'])
     def profile(self, request, pk=None):

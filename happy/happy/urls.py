@@ -28,12 +28,14 @@ router.register('profiles', ProfileViewSet)
 router.register(r'posts', PostViewSet)
 
 urlpatterns = [
+    #django admin
     path('admin/', admin.site.urls),
+    
+    #rest api
     path('api-auth/', include('rest_framework.urls')),
-
     path(r'api/v1/', include((router.urls,'apiv1'), namespace='apiv1')),
+    
+    #user management
     path('', include('accounts.urls')),
     path('accounts/', include('accounts.urls')), 
-    path('accounts/', include('django.contrib.auth.urls')), 
-    path('accounts/', include('allauth.urls')), 
 ]

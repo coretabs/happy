@@ -18,13 +18,11 @@ class UserSerializer(serializers.ModelSerializer):
     #                                            many=True,
     #                                            queryset=models.Post.objects.all())
     # profile = ProfileSerializer(read_only=True)
-    profile = serializers.HyperlinkedRelatedField(read_only=True,
-                                                  view_name='apiv1:profile-detail')
     posts = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='apiv1:post-detail')
 
     class Meta:
         model = CustomUser
-        fields = ('id', 'username', 'email', 'password', 'profile', 'posts')
+        fields = ('username', 'email', 'password', 'posts')
         extra_kwargs = {'password': {'write_only': True},
                         'posts': {'read_only': True}}
 

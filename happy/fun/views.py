@@ -1,4 +1,4 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, generics
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from posts.serializers import PostSerializer
@@ -11,10 +11,16 @@ from .serializers import UserSerializer, ProfileSerializer
 
 
 
-class ProfileViewSet(viewsets.ModelViewSet):
+class UserProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = ProfileSerializer
-    queryset = Profile.objects.all()
+    def get_object(self):
+        profile = Profile.objects.get(id=self.request.user.id)
+        return profile
 
+class UserView(generics.RetrieveUpdateAPIView):
+    serializer_class = UserSerializer
+    def get_object(self):
+        return self.request.user
 
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer

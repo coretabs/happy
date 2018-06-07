@@ -18,13 +18,12 @@ from django.urls import path, include
 from django.contrib import admin
 
 from rest_framework import routers
-from fun.views import UserViewSet, ProfileViewSet
+from fun.views import UserViewSet, UserProfileView, UserView
 from posts.views import PostViewSet
 # from fun.routers import router
 
 router = routers.DefaultRouter()
 router.register('users', UserViewSet)
-router.register('profiles', ProfileViewSet)
 router.register(r'posts', PostViewSet)
 
 urlpatterns = [
@@ -34,6 +33,8 @@ urlpatterns = [
     #rest api
     path('api-auth/', include('rest_framework.urls')),
     path(r'api/v1/', include((router.urls,'apiv1'), namespace='apiv1')),
+    path(r'api/v1/user/', UserView.as_view()),
+    path(r'api/v1/user/profile/', UserProfileView.as_view()),
     
     #user management
     path('', include('accounts.urls')),

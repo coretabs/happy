@@ -18,7 +18,8 @@ from django.urls import path, include
 from django.contrib import admin
 
 from rest_framework import routers
-from fun.views import UserViewSet, UserProfileView, UserView
+from accounts.views import (UserViewSet, UserProfileView,
+                            UserView, UserPostsView)
 from posts.views import PostViewSet
 # from fun.routers import router
 
@@ -26,17 +27,37 @@ router = routers.DefaultRouter()
 router.register('users', UserViewSet)
 router.register(r'posts', PostViewSet)
 
+
 urlpatterns = [
-    #django admin
+    # django admin
     path('admin/', admin.site.urls),
-    
-    #rest api
+
+    # rest api
     path('api-auth/', include('rest_framework.urls')),
-    path(r'api/v1/', include((router.urls,'apiv1'), namespace='apiv1')),
+    path(r'api/v1/', include((router.urls, 'apiv1'), namespace='apiv1')),
     path(r'api/v1/user/', UserView.as_view()),
     path(r'api/v1/user/profile/', UserProfileView.as_view()),
-    
-    #user management
-    path('', include('accounts.urls')),
-    path('accounts/', include('accounts.urls')), 
+    path(r'api/v1/user/posts/', UserPostsView.as_view()),
+
+
+    # user management
+    # path('', include('accounts.urls')),
+    # path('accounts/', include('accounts.urls')),
 ]
+"""
+urls:
+
+api/v1/user/
+api/v1/user/profile
+api/v1/user/posts
+
+api/v1/users/
+api/v1/users/<id>/
+api/v1/users/<id>/posts/
+api/v1/users/<id>/profile/
+
+api/v1/posts/
+api/v1/posts/<id>/
+api/v1/posts/<id>/comments
+
+"""

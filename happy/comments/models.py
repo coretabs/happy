@@ -1,7 +1,7 @@
 from django.db import models
 
-#from django.contrib.auth.models import User
-from accounts.models import CustomUser as User
+from django.contrib.auth.models import User
+# from accounts.models import CustomUser as User
 from posts.models import Post
 
 
@@ -21,7 +21,7 @@ class BaseComment(models.Model):
 
 class Comment(BaseComment):
     parent = models.ForeignKey(Post, on_delete=models.CASCADE,
-                             related_name="post_comments")
+                               related_name="post_comments")
 
 
 class Reply(BaseComment):

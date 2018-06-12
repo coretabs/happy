@@ -4,8 +4,8 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import permissions
-from .models import Post, Like, Dislike
-from .serializers import PostSerializer, LikeSerializer, DislikeSerializer
+from .models import Post
+from .serializers import PostSerializer
 from comments.models import Comment
 from comments.serializers import CommentSerializer
 # Create your views here.
@@ -26,18 +26,30 @@ class PostViewSet(viewsets.ModelViewSet):
         serializer = CommentSerializer(reviews, many=True)
         return Response(serializer.data)
 
-    @action(detail=True, methods=['get'])
-    def likes(self, request, pk=None):
-        likes = Like.objects.filter(post_id=pk)
-        serializer = LikeSerializer(likes, many=True)
-        return Response(serializer.data)
 
     @action(detail=True, methods=['get'])
-    def dislikes(self, request, pk=None):
-        dislikes = Dislike.objects.filter(post_id=pk)
-        serializer = DislikeSerializer(dislikes, many=True)
-        return Response(serializer.data)
+    def like(self, request , pk=None):
+        post = Post.objects.get(pk=pk)
+        if post.likes.filter(id=request.user.id).exists():
+            post.likes.remove(request.user)
+            return Response("Like has been removed")
+        else: 
+            if post.dislikes.filter(id=request.user.id).exists():
+                post.dislikes.remove(request.user)
+            post.likes.add(request.user)
+            return Response("Like has been added")
 
+    @action(detail=True, methods= ["get"])
+    def dislike(self, request, pk=None):
+        post = Post.objects.get(pk=pk)
+        if post.dislikes.filter(id=request.user.id).exists():
+            post.dislikes.remove(request.user)
+            return Response("Dislike has been removed")
+        else: 
+            if post.likes.filter(id=request.user.id).exists():
+                post.likes.remove(request.user)
+            post.dislikes.add(request.user)
+            return Response("Dislike has been added")
 
 """
 class LikeViewSet(viewsets.ModelViewSet):

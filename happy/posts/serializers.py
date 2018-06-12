@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Post, Like, Dislike
+from .models import Post
 from comments.models import Comment
 
 
@@ -21,26 +21,11 @@ class PostSerializer(serializers.ModelSerializer):
 
         return Comment.objects.filter(parent=post).count()
 
-    def get_likes_count(self, post):
-        """ get the number of likes for single post """
-
-        return Like.objects.filter(post=post).count()
+    def get_likes_count(self,post):
+        return post.likes_count()
 
     def get_dislikes_count(self, post):
-        """ get the number of dislikes for single post """
-
-        return Dislike.objects.filter(post=post).count()
+        return post.dislikes_count()
 
 
-class LikeSerializer(serializers.ModelSerializer):
 
-    class Meta:
-        model = Like
-        fields = ('id', 'user', 'post', 'created')
-
-
-class DislikeSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Dislike
-        fields = ('id', 'user', 'post', 'created')

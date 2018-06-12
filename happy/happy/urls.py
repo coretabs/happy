@@ -21,11 +21,16 @@ from rest_framework import routers
 from accounts.views import (UserViewSet, UserProfileView,
                             UserView, UserPostsView)
 from posts.views import PostViewSet
+from comments.views import CommentViewSet, ReplyViewSet
+
 # from fun.routers import router
 
 router = routers.DefaultRouter()
 router.register('users', UserViewSet)
 router.register(r'posts', PostViewSet)
+router.register(r'comments', CommentViewSet)
+router.register(f'replies', ReplyViewSet)
+
 
 
 urlpatterns = [
@@ -59,5 +64,17 @@ api/v1/users/<id>/profile/
 api/v1/posts/
 api/v1/posts/<id>/
 api/v1/posts/<id>/comments
+api/v1/posts/<id>/like
+api/v1/posts/<id>/dislike
 
+api/v1/comments/
+api/v1/comments/<id>
+api/v1/comments/<id>/replies
+api/v1/comments/<id>/like
+api/v1/comments/<id>/dislike
+
+api/v1/replies/
+api/v1/replies/<id>/
+api/v1/replies/<id>/like
+api/v1/replies/<id>/dislike
 """

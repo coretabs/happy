@@ -4,12 +4,19 @@ from rest_framework import serializers
 
 
 class BaseCommentSerializer(serializers.ModelSerializer):
-
+    likes_count = serializers.SerializerMethodField()
+    dislikes_count = serializers.SerializerMethodField()
+    
     class Meta:
         fields = '__all__'
         model = BaseComment
+   
+    def get_likes_count(self, comment):
+        return comment.likes_count()
 
-
+    def get_dislikes_count(self, comment):
+        return comment.dislikes_count()
+        
 class CommentSerializer(BaseCommentSerializer):
     replies_count = serializers.SerializerMethodField()
     # replies = serializers.SerializerMethodField()
@@ -30,3 +37,4 @@ class ReplySerializer(BaseCommentSerializer):
         extra_kwargs = {}
         fields = '__all__'
         model = Reply
+

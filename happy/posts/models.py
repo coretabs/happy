@@ -11,36 +11,15 @@ class Post(models.Model):
     modified = models.DateTimeField(auto_now=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE,
                                related_name="posts")
-
+    likes = models.ManyToManyField(User, related_name="likes", blank=True)
+    dislikes = models.ManyToManyField(User, related_name="dislikes", blank=True)
+    
     def __str__(self):
         return self.content[:50]
 
+    def likes_count(self):
+        return self.likes.count()
 
-class Like(models.Model):
-    user = models.ForeignKey(User,
-                             on_delete=models.CASCADE,
-                             related_name="likes"
-                             )
-    post = models.ForeignKey(Post,
-                             on_delete=models.CASCADE,
-                             related_name="likes"
-                             )
-    created = models.DateTimeField(auto_now_add=True)
+    def dislikes_count(self):
+        return self.dislikes.count()
 
-    def __str__(self):
-        return f"{self.user} likes {self.post}"
-
-
-class Dislike(models.Model):
-    user = models.ForeignKey(User,
-                             on_delete=models.CASCADE,
-                             related_name="dislikes"
-                             )
-    post = models.ForeignKey(Post,
-                             on_delete=models.CASCADE,
-                             related_name="dislikes"
-                             )
-    created = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.user} dislikes {self.post}"

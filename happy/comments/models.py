@@ -14,9 +14,17 @@ class BaseComment(models.Model):
                                related_name="comments")
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
+    likes = models.ManyToManyField(User, blank=True, related_name="like")
+    dislikes = models.ManyToManyField(User, blank=True, related_name="dislike")
 
     def __str__(self):
         return self.content[:50]
+
+    def likes_count(self):
+        return self.likes.count()
+
+    def dislikes_count(self):
+      return self.dislikes.count()
 
 
 class Comment(BaseComment):

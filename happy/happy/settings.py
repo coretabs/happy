@@ -43,12 +43,16 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'rest_framework.authtoken',
-    # 'allauth',
-    # 'allauth.account',
-    # 'allauth.socialaccount',
-    # 'allauth.socialaccount.providers.google',
-    # 'allauth.socialaccount.providers.facebook',
+    'rest_auth',
+    'rest_auth.registration',
 
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.facebook',
+
+    'django_extensions',
     'fun',
     'accounts',
     'posts',
@@ -143,6 +147,7 @@ STATIC_URL = '/static/'
 # REST framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
@@ -162,20 +167,31 @@ LOGOUT_REDIRECT_URL = '/'  # 'home'
 
 AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",
-    # "allauth.account.auth_backends.AuthenticationBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
 )
 
 SITE_ID = 1
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
 
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 
 ACCOUNT_EMAIL_REQUIRED = True
 
 ACCOUNT_USERNAME_REQUIRED = False
+
+ACCOUNT_USERNAME_MIN_LENGTH = 3
+
+ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS = False
+
+ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = '/'
+
+#ACCOUNT_ADAPTER = 'accounts.adapter.MyAccountAdapter'
+
+ACCOUNT_USERNAME_BLACKLIST = ['system', ]
 
 SOCIALACCOUNT_PROVIDERS = \
     {
@@ -209,3 +225,15 @@ SOCIALACCOUNT_PROVIDERS = \
                 }
         }
         }
+
+REST_AUTH_SERIALIZERS = {
+    'LOGIN_SERIALIZER': 'accounts.serializers.LoginSerializer',
+    'USER_DETAILS_SERIALIZER': 'accounts.serializers.UserDetailsSerializer',
+    'PASSWORD_RESET_SERIALIZER': 'accounts.serializers.PasswordResetSerializer',
+    'PASSWORD_RESET_CONFIRM_SERIALIZER': 'accounts.serializers.PasswordResetConfirmSerializer',
+    'TOKEN_SERIALIZER': 'accounts.serializers.TokenSerializer'
+}
+
+REST_AUTH_REGISTER_SERIALIZERS = {
+    'REGISTER_SERIALIZER': 'accounts.serializers.RegisterSerializer',
+    }

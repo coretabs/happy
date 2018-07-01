@@ -16,10 +16,13 @@ python manage.py runserver
 
 ```
 runserver on localhost SSL:
-* to test social account login: replace 127.0.0.1 with localhost.
-'''
+
+```
+
 python manage.py runserver_plus --cert-file /tmp/cert
-'''
+
+```
+* to test social account login: replace 127.0.0.1 with localhost.
 
 install requirments file : pip install -r requirements.txt
 

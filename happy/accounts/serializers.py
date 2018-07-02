@@ -193,8 +193,11 @@ class UserDetailsSerializer(serializers.ModelSerializer):
         fields = ('username', 'email', 'email_status', 'name', 'profile')
 
     def get_email_status(self, obj):
-        email_address = EmailAddress.objects.get(user=obj)
-        return email_address.verified
+        try:
+            email_address = EmailAddress.objects.get(user=obj)
+            return email_address.verified
+        except EmailAddress.DoesNotExist:
+            return ('E-mail is not verified.')
 
 
     def validate_name(self, name):

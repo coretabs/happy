@@ -10,6 +10,7 @@ class Profile(models.Model):
     location = models.CharField(max_length=30, blank=True)
     birth_date = models.DateField(null=True, blank=True)
 
+
     def __str__(self):
         return f"{self.user} Profile"
 
@@ -23,3 +24,23 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
+
+class Link(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    SOCIAL_APP = (
+            ('FB','Facebook'),
+            ('IG','Instagram'),
+            ('YT','Youtube'),
+        )
+    social_app = models.CharField(
+            max_length=2,
+            choices=SOCIAL_APP,
+            default= None,
+            blank= True
+        )
+    social_link = models.URLField(
+            max_length=255,
+            blank=True
+            )
+    def __str__(self):
+        return self.social_app

@@ -1,4 +1,7 @@
 from django.urls import path, include
+from avatars.views import upload_avatar_view
+
+
 from allauth.account.views import confirm_email as allauthemailconfirmation
 from rest_framework_jwt.views import obtain_jwt_token
 
@@ -15,6 +18,7 @@ urlpatterns = [
     path(r'token/', obtain_jwt_token),
     path(r'logout/', logout_view),
     path(r'user/', user_details_view),
+    path(r'user/avatar/', upload_avatar_view),
     path(r'user/profile/', UserProfileView.as_view()),
     path(r'user/posts/', UserPostsView.as_view()),
     path(r'registration/', include('rest_auth.registration.urls')),

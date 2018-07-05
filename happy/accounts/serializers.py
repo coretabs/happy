@@ -29,7 +29,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ( 'bio', 'location', 'birth_date')
+        fields = ( 'bio', 'location', 'birth_date',)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -180,25 +180,29 @@ class ResendConfirmSerializer(serializers.Serializer):
         send_email_confirmation(request, user, True)
         return email
 
-
 class UserDetailsSerializer(serializers.ModelSerializer):
     email_status = serializers.SerializerMethodField()
+    avatar_url = serializers.SerializerMethodField()
     profile = ProfileSerializer()
+    avatar = serializers.ImageField(write_only=True, required=False)
     name = serializers.CharField(source='first_name',
                                  max_length=100,
                                  min_length=5)
 
     class Meta:
         model = UserModel
-        fields = ('username', 'email', 'email_status', 'name', 'profile')
+        fields = ('username', 'email', 'email_status', 'name', 'profile', 'avatar', 'avatar_url')
 
     def get_email_status(self, obj):
-        try:
-            email_address = EmailAddress.objects.get(user=obj)
-            return email_address.verified
-        except EmailAddress.DoesNotExist:
-            return ('E-mail is not verified.')
+        email_address = EmailAddress.objects.get(user=obj)
+        return email_address.verified
 
+    def get_avatar_url(self, obj, size=settings.AVATAR_DEFAULT_SIZE):
+        for provider_path in settings.AVATAR_PROVIDERS:
+            provider = import_string(provider_path)
+            avatar_url = provider.get_avatar_url(obj, size)
+            if avatar_url:
+                return avatar_url
 
     def validate_name(self, name):
         pattern = "^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ðء-ي]+ [a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ðء-ي]+[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ðء-ي ]*$"
@@ -208,6 +212,27 @@ class UserDetailsSerializer(serializers.ModelSerializer):
                 _("Make sure it contains only letters and spaces."))
 
         return name
+
+    def validate_avatar(self, avatar):
+        if settings.AVATAR_ALLOWED_FILE_EXTS:
+            root, ext = os.path.splitext(avatar.name.lower())
+            if ext not in settings.AVATAR_ALLOWED_FILE_EXTS:
+                valid_exts = ", ".join(settings.AVATAR_ALLOWED_FILE_EXTS)
+                error = _("%(ext)s is an invalid file extension. "
+                          "Authorized extensions are : %(valid_exts_list)s")
+                raise serializers.ValidationError(error %
+                                            {'ext': ext,
+                                             'valid_exts_list': valid_exts})
+
+        if avatar.size > settings.AVATAR_MAX_SIZE:
+            error = _("Your file is too big: %(size)s, "
+                      "the maximum allowed size is: %(max_valid_size)s")
+
+            raise serializers.ValidationError(error % {
+                'size': filesizeformat(avatar.size),
+                'max_valid_size': filesizeformat(settings.AVATAR_MAX_SIZE)
+            })
+
 
     def validate_email(self, email):
         email = get_adapter().clean_email(email)
@@ -222,7 +247,11 @@ class UserDetailsSerializer(serializers.ModelSerializer):
         instance.username = validated_data.get('username', instance.username)
         instance.first_name = validated_data.get(
             'first_name', instance.first_name)
-                    
+        if profile:
+            instance.profile.track = profile.get('track', instance.profile.track)
+            instance.profile.last_opened_lesson = profile.get(
+                                            'last_opened_lesson', instance.profile.last_opened_lesson)
+
         email = validated_data.get('email', None)
         if email and email != instance.email:
             adapter = get_adapter()
@@ -231,13 +260,18 @@ class UserDetailsSerializer(serializers.ModelSerializer):
             email_address.change(request, email, True)
             instance.email = email
 
+        if 'avatar' in request.FILES:
+            avatar = Avatar(user=instance, primary=True)
+            image_file = request.FILES['avatar']
+            avatar.avatar.save(image_file.name, image_file)
+            avatar.save()
+            avatar_updated.send(sender=Avatar, user=instance, avatar=avatar)
+
         instance.save()
 
         # sync_sso(instance)
 
         return instance
-
-
 
 class TokenSerializer(serializers.ModelSerializer):
     user = UserDetailsSerializer()

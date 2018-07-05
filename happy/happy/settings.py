@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_auth',
     'rest_auth.registration',
-
+    
+    'avatar',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -144,6 +145,10 @@ USE_TZ = True
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'happy/media/')
+
+
 # REST framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -174,6 +179,10 @@ SITE_ID = 1
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
+
+AVATAR_CLEANUP_DELETED = True
+
+AVATAR_MAX_AVATARS_PER_USER = 1
 
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 

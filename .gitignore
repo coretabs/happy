@@ -7,6 +7,7 @@ __pycache__/
 *.so
 
 #virtualenv dirs
+VENV
 venv
 
 #vscode config

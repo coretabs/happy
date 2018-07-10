@@ -30,7 +30,8 @@ class BaseComment(models.Model):
 class Comment(BaseComment):
     parent = models.ForeignKey(Post, on_delete=models.CASCADE,
                                related_name="post_comments")
-
+def __str__(self):
+        return self.content[:50]
 
 class Reply(BaseComment):
     parent = models.ForeignKey(Comment, on_delete=models.CASCADE,

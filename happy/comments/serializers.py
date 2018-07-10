@@ -38,7 +38,7 @@ class ReplySerializer(BaseCommentSerializer):
     author = serializers.ReadOnlyField(source='author.username')
 
     class Meta:
+        model = Reply
         extra_kwargs = {}
         fields = '__all__'
-        model = Reply
 

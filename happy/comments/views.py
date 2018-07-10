@@ -56,6 +56,9 @@ class ReplyViewSet(viewsets.ModelViewSet):
     queryset = Reply.objects.all()
     serializer_class = ReplySerializer
 
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
     @action(detail=True, methods=['get'])
     def like(self, request , pk=None):
         reply = Reply.objects.get(pk=pk)

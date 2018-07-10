@@ -20,6 +20,7 @@ class BaseCommentSerializer(serializers.ModelSerializer):
 class CommentSerializer(BaseCommentSerializer):
     replies_count = serializers.SerializerMethodField()
     # replies = serializers.SerializerMethodField()
+    author = serializers.ReadOnlyField(source='author.username')
 
     class Meta:
         extra_kwargs = {}
@@ -33,6 +34,9 @@ class CommentSerializer(BaseCommentSerializer):
 
 
 class ReplySerializer(BaseCommentSerializer):
+        
+    author = serializers.ReadOnlyField(source='author.username')
+
     class Meta:
         extra_kwargs = {}
         fields = '__all__'

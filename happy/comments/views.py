@@ -1,6 +1,8 @@
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework import permissions
+from fun.permissions import IsOwnerOrReadOnly
 
 
 from .models import Comment, Reply
@@ -12,6 +14,11 @@ from .serializers import CommentSerializer, ReplySerializer
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
+                          IsOwnerOrReadOnly,)
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
 
     @action(detail=True, methods=['get'])
     def replies(self, request, pk=None):

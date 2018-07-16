@@ -46,6 +46,9 @@ urlpatterns = [
     # user management
     path(r'accounts/', include('allauth.urls')),
     path(r'avatar/', include('avatar.urls')),
+    
+    path(r'api/v1/nested/', include('posts.urls')),
+
 ]
 
 

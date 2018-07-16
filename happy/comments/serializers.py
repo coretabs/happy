@@ -23,9 +23,11 @@ class CommentSerializer(BaseCommentSerializer):
     author = serializers.ReadOnlyField(source='author.username')
 
     class Meta:
-        extra_kwargs = {}
-        fields = '__all__'
         model = Comment
+        fields = '__all__'
+        extra_kwargs = {'likes': {'read_only': True},
+                       'dislikes': {'read_only': True},
+                       'parent': {'read_only': True}}
 
     def get_replies_count(self, comment):
         """ get the number of replies for single comment """
@@ -39,6 +41,8 @@ class ReplySerializer(BaseCommentSerializer):
 
     class Meta:
         model = Reply
-        extra_kwargs = {}
+        extra_kwargs = {'likes': {'read_only': True},
+                       'dislikes': {'read_only': True},
+                       'parent': {'read_only': True}}
         fields = '__all__'
 

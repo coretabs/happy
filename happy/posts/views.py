@@ -105,6 +105,29 @@ class PostViewSet2(viewsets.ViewSet):
         post.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
+    @action(detail=True, methods=['get'])
+    def like(self, request , pk=None):
+        post = Post.objects.get(pk=pk)
+        if post.likes.filter(id=request.user.id).exists():
+            post.likes.remove(request.user)
+            return Response("Like has been removed")
+        else: 
+            if post.dislikes.filter(id=request.user.id).exists():
+                post.dislikes.remove(request.user)
+            post.likes.add(request.user)
+            return Response("Like has been added")
+    
+    @action(detail=True, methods= ["get"])
+    def dislike(self, request, pk=None):
+        post = Post.objects.get(pk=pk)
+        if post.dislikes.filter(id=request.user.id).exists():
+            post.dislikes.remove(request.user)
+            return Response("Dislike has been removed")
+        else: 
+            if post.likes.filter(id=request.user.id).exists():
+                post.likes.remove(request.user)
+            post.dislikes.add(request.user)
+            return Response("Dislike has been added")
 
 class CommentViewSet2(viewsets.ViewSet):
     serializer_class = CommentSerializer
@@ -148,6 +171,30 @@ class CommentViewSet2(viewsets.ViewSet):
         comment.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
+    @action(detail=True, methods=['get'])
+    def like(self, request , pk=None, post_pk=None):
+        comment = Comment.objects.get(pk=pk)
+        if comment.likes.filter(id=request.user.id).exists():
+            comment.likes.remove(request.user)
+            return Response("Like has been removed")
+        else: 
+            if comment.dislikes.filter(id=request.user.id).exists():
+                comment.dislikes.remove(request.user)
+            comment.likes.add(request.user)
+            return Response("Like has been added")
+    
+    @action(detail=True, methods= ["get"])
+    def dislike(self, request, pk=None, post_pk=None):
+        comment = Comment.objects.get(pk=pk)
+        if comment.dislikes.filter(id=request.user.id).exists():
+            comment.dislikes.remove(request.user)
+            return Response("Dislike has been removed")
+        else: 
+            if comment.likes.filter(id=request.user.id).exists():
+                comment.likes.remove(request.user)
+            comment.dislikes.add(request.user)
+            return Response("Dislike has been added")
+    
 
 class ReplyViewSet2(viewsets.ViewSet):
     serializer_class = ReplySerializer
@@ -190,3 +237,27 @@ class ReplyViewSet2(viewsets.ViewSet):
 
         reply.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    @action(detail=True, methods=['get'])
+    def like(self, request , pk=None, post_pk=None, comment_pk=None):
+        reply = Reply.objects.get(pk=pk)
+        if reply.likes.filter(id=request.user.id).exists():
+            reply.likes.remove(request.user)
+            return Response("Like has been removed")
+        else: 
+            if reply.dislikes.filter(id=request.user.id).exists():
+                reply.dislikes.remove(request.user)
+            reply.likes.add(request.user)
+            return Response("Like has been added")
+    
+    @action(detail=True, methods= ["get"])
+    def dislike(self, request, pk=None, post_pk=None, comment_pk=None):
+        reply = Reply.objects.get(pk=pk)
+        if reply.dislikes.filter(id=request.user.id).exists():
+            reply.dislikes.remove(request.user)
+            return Response("Dislike has been removed")
+        else: 
+            if reply.likes.filter(id=request.user.id).exists():
+                reply.likes.remove(request.user)
+            reply.dislikes.add(request.user)
+            return Response("Dislike has been added")

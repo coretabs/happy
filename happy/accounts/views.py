@@ -82,9 +82,7 @@ class LogoutView(LV):
             request.user.auth_token.delete()
         except (AttributeError, ObjectDoesNotExist):
             pass
-        if request.user.id:
-            self.discourse_logout(request)
-
+            
         django_logout(request)
 
         return Response({"detail": _("Successfully logged out.")},

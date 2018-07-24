@@ -12,9 +12,15 @@ class PostSerializer(serializers.ModelSerializer):
     class Meta:
         extra_kwargs = {}
 
-        fields = ('id', 'author', 'content', 'created', 'modified',
-                  'likes_count', 'dislikes_count', 'comments_count')
         model = Post
+        fields = '__all__'
+
+    def validate(self,data):
+        null = None
+        if len(data['content']) <=0  and data['mediafile'] is null :
+            raise serializers.ValidationError(u'at least one field is required')
+        return data
+
 
     def get_comments_count(self, post):
         """ get the number of comments for single post """

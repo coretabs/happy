@@ -12,8 +12,9 @@ class PostSerializer(serializers.ModelSerializer):
     dislikes_count = serializers.SerializerMethodField()
 
     class Meta:
-        extra_kwargs = {}
-
+        extra_kwargs = {'likes': {'read_only': True},
+                        'dislikes': {'read_only': True}
+        }
         model = Post
         fields = '__all__'
 

@@ -71,9 +71,9 @@ class PostViewSet2(viewsets.ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def retrieve(self, request, pk=None):
-        # queryset =  Post.objects.filter()
-        # post =  get_object_or_404(queryset, pk=pk)
-        post =  Post.objects.get(pk=pk)
+        queryset =  Post.objects.all()
+        post =  get_object_or_404(queryset, pk=pk)
+        # post =  Post.objects.get(pk=pk)
         serializer = PostSerializer(post)
         return Response(serializer.data)
     

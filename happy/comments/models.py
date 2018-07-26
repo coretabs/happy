@@ -35,7 +35,7 @@ def __str__(self):
 
 class Reply(BaseComment):
     parent = models.ForeignKey(Comment, on_delete=models.CASCADE,
-                               related_name="comment_replies", null=True)
+                               related_name="comment_replies")
 
     def __str__(self):
         return self.content[:50]

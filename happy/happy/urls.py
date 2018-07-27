@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.views.generic import TemplateView
 
 from rest_framework import routers
-from accounts.views import UserViewSet
+from accounts.views import UserViewSet, UserSocialLinksViewSet
 from posts.views import PostViewSet
 from comments.views import CommentViewSet, ReplyViewSet
 
@@ -27,6 +27,7 @@ from comments.views import CommentViewSet, ReplyViewSet
 
 router = routers.DefaultRouter()
 router.register('users', UserViewSet)
+router.register('social', UserSocialLinksViewSet)
 router.register(r'posts', PostViewSet)
 router.register(r'comments', CommentViewSet)
 router.register(f'replies', ReplyViewSet)

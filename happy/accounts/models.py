@@ -26,7 +26,7 @@ def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
 
 class Link(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='link')
     SOCIAL_APP = (
             ('FB','Facebook'),
             ('IG','Instagram'),

@@ -1,7 +1,8 @@
 import os, requests
 from rest_framework import viewsets, generics
 from rest_framework.generics import GenericAPIView, RetrieveUpdateAPIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from fun.permissions import IsOwnerOrReadOnlyUser
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status
@@ -27,10 +28,11 @@ from django.contrib.auth import logout as django_logout
 from django.utils.translation import ugettext_lazy as _
 from django.urls import reverse_lazy
 
-from .models import Profile
+from .models import Profile, Link
 from django.contrib.auth.models import User
 
-from .serializers import (UserSerializer, 
+from .serializers import (UserSerializer,
+                        UserSocialLinksSerializer,
                         ProfileSerializer,
                         ResendConfirmSerializer, 
                         UserDetailsSerializer,
@@ -45,6 +47,31 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         profile = Profile.objects.get(id=user.id)
         return profile
 
+class UserSocialLinksViewSet(viewsets.ModelViewSet):
+    queryset = Link.objects.all()
+    serializer_class = UserSocialLinksSerializer
+    permission_classes = (IsAuthenticated,
+                         IsOwnerOrReadOnlyUser, )
+    
+    def get_queryset(self):
+        return Link.objects.filter(user_id=self.request.user.profile.id)
+
+    def perform_create(self, serializer):
+        if serializer.is_valid(raise_exception=True):
+            if Link.objects.filter(social_app=self.request.data["social_app"], 
+                                    user_id= self.request.user.profile.id).exists():
+                raise serializers.ValidationError("Link already exists")
+            serializer.save(user=self.request.user.profile)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+    def retrieve(self, request, pk=None):
+        # queryset =  Post.objects.filter()
+        # post =  get_object_or_404(queryset, pk=pk)
+        link =  get_object_or_404(Link.objects.all(), pk=pk)
+        serializer = UserSocialLinksSerializer(link)
+        return Response(serializer.data)
+
 class UserPostsView(generics.ListAPIView):
     serializer_class = PostSerializer
 
@@ -54,12 +81,11 @@ class UserPostsView(generics.ListAPIView):
         return posts
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
-
-    def perform_create(self, serializer):
-        serializer.save()
+    permission_classes = (IsAuthenticatedOrReadOnly,
+                         IsOwnerOrReadOnlyUser, )
 
     @action(detail=True, methods=['get'])
     def posts(self, request, pk=None):
@@ -75,6 +101,16 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = ProfileSerializer(profile, context=context, many=True)
         return Response(serializer.data)
 
+class UserDetailsView(RetrieveUpdateAPIView):
+
+    serializer_class = UserDetailsSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_object(self):
+        return self.request.user
+
+
+user_details_view = UserDetailsView.as_view()
 
 class LogoutView(LV):
     def logout(self, request):
@@ -89,17 +125,6 @@ class LogoutView(LV):
                         status=status.HTTP_200_OK)
 
 logout_view = LogoutView.as_view()
-
-class UserDetailsView(RetrieveUpdateAPIView):
-
-    serializer_class = UserDetailsSerializer
-    permission_classes = (IsAuthenticated,)
-
-    def get_object(self):
-        return self.request.user
-
-
-user_details_view = UserDetailsView.as_view()
 
 class ResendConfirmView(GenericAPIView):
 

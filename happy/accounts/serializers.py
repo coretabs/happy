@@ -1,5 +1,5 @@
 import re
-from .models import Profile
+from .models import Profile, Link
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.utils.module_loading import import_string
@@ -26,11 +26,17 @@ UserModel = get_user_model()
 
 class ProfileSerializer(serializers.ModelSerializer):
     """a serializer for our user profile objects"""
-
+    link  = serializers.HyperlinkedRelatedField(many=True, read_only=True, 
+                                               view_name='apiv1:link-detail') 
     class Meta:
         model = Profile
-        fields = ( 'bio', 'location', 'birth_date',)
-
+        fields = ( 'bio', 'location', 'birth_date','link')
+        
+class UserSocialLinksSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Link
+        fields = ('id','social_app','social_link')
 
 class UserSerializer(serializers.ModelSerializer):
 

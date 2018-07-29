@@ -27,7 +27,7 @@ UserModel = get_user_model()
 class ProfileSerializer(serializers.ModelSerializer):
     """a serializer for our user profile objects"""
     link  = serializers.HyperlinkedRelatedField(many=True, read_only=True, 
-                                               view_name='apiv1:link-detail') 
+                                               view_name='apiv1:link-detail')
     class Meta:
         model = Profile
         fields = ( 'bio', 'location', 'birth_date','link')
@@ -186,7 +186,9 @@ class ResendConfirmSerializer(serializers.Serializer):
         send_email_confirmation(request, user, True)
         return email
 
+from posts.serializers import PostSerializer
 class UserDetailsSerializer(serializers.ModelSerializer):
+    posts = PostSerializer(many=True, read_only=True)
     email_status = serializers.SerializerMethodField()
     avatar_url = serializers.SerializerMethodField()
     profile = ProfileSerializer()
@@ -197,7 +199,7 @@ class UserDetailsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserModel
-        fields = ('username', 'email', 'email_status', 'name', 'profile', 'avatar', 'avatar_url')
+        fields = ('username', 'email', 'email_status', 'name', 'profile', 'avatar', 'avatar_url', 'posts')
 
     def get_email_status(self, obj):
         email_address = EmailAddress.objects.get(user=obj)

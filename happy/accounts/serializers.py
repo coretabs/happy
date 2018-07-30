@@ -14,6 +14,7 @@ from rest_auth.registration.serializers import RegisterSerializer as RS
 from rest_auth.serializers import LoginSerializer as LS
 from rest_auth.models import TokenModel
 
+from avatar.models import Avatar
 from allauth.account.forms import ResetPasswordForm, default_token_generator
 from allauth.account.utils import send_email_confirmation, user_pk_to_url_str
 from allauth.account.forms import UserTokenForm

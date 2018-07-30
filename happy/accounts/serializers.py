@@ -23,11 +23,19 @@ from allauth.account.models import EmailAddress
 
 UserModel = get_user_model()
 
+class ListUserSociaLinkSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Link
+        fields = ('social_app','social_link')
+
+    def to_representation(self, instance):
+        data = super(ListUserSociaLinkSerializer, self).to_representation(instance)
+        return {data["social_app"]: data["social_link"]}
 
 class ProfileSerializer(serializers.ModelSerializer):
     """a serializer for our user profile objects"""
-    link  = serializers.HyperlinkedRelatedField(many=True, read_only=True, 
-                                               view_name='apiv1:link-detail')
+    link  = ListUserSociaLinkSerializer(many=True, read_only=True)
     class Meta:
         model = Profile
         fields = ( 'bio', 'location', 'birth_date','link')

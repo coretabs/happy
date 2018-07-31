@@ -264,6 +264,17 @@ class UserDetailsSerializer(serializers.ModelSerializer):
         instance.username = validated_data.get('username', instance.username)
         instance.first_name = validated_data.get(
             'first_name', instance.first_name)
+        
+        if profile :
+            bio = profile.get("bio")
+            location = profile.get("location")
+            birth_date = profile.get("birth_date")
+            if bio and bio != instance.profile.bio :
+                instance.profile.bio = bio
+            if location and location != instance.profile.location:
+                instance.profile.location = location
+            if birth_date and birth_date != instance.profile.birth_date:
+                instance.profile.birth_date = birth_date 
 
         email = validated_data.get('email', None)
         if email and email != instance.email:

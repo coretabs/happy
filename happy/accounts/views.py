@@ -6,6 +6,7 @@ from fun.permissions import IsOwnerOrReadOnlyUser
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status
+from django.shortcuts import get_object_or_404
 
 from posts.serializers import PostSerializer
 from posts.models import Post
@@ -179,3 +180,13 @@ verify_email = VerifyEmailView.as_view()
 
 class FacebookLogin(SocialLoginView):
     adapter_class = FacebookOAuth2Adapter
+
+
+class GetUserProfile(viewsets.ViewSet):
+    serializer = UserDetailsSerializer
+
+    def retrieve(self, request, username=None):
+        queryset =  User.objects.all()
+        user =  get_object_or_404(queryset, username=username)        
+        serializer = UserDetailsSerializer(user, context={'request': request})
+        return Response(serializer.data)

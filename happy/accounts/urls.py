@@ -10,7 +10,8 @@ from .views import (FacebookLogin,
                    UserPostsView,logout_view,
                    user_details_view,
                    resend_confirmation_view,
-                   verify_email)
+                   verify_email,
+                   GetUserProfile)
 
 urlpatterns = [
     path(r'', include('rest_auth.urls')),
@@ -25,5 +26,6 @@ urlpatterns = [
     path(r'confirmation/', resend_confirmation_view),
     #path(r'registration/verify-email/', verify_email),
 
+    path(r'user/<username>/', GetUserProfile.as_view({'get': 'retrieve'})),
 
 ]

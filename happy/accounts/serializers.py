@@ -14,6 +14,7 @@ from rest_auth.registration.serializers import RegisterSerializer as RS
 from rest_auth.serializers import LoginSerializer as LS
 from rest_auth.models import TokenModel
 
+from avatar.models import Avatar
 from allauth.account.forms import ResetPasswordForm, default_token_generator
 from allauth.account.utils import send_email_confirmation, user_pk_to_url_str
 from allauth.account.forms import UserTokenForm
@@ -23,11 +24,19 @@ from allauth.account.models import EmailAddress
 
 UserModel = get_user_model()
 
+class ListUserSociaLinkSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Link
+        fields = ('social_app','social_link')
+
+    def to_representation(self, instance):
+        data = super(ListUserSociaLinkSerializer, self).to_representation(instance)
+        return {data["social_app"]: data["social_link"]}
 
 class ProfileSerializer(serializers.ModelSerializer):
     """a serializer for our user profile objects"""
-    link  = serializers.HyperlinkedRelatedField(many=True, read_only=True, 
-                                               view_name='apiv1:link-detail')
+    link  = ListUserSociaLinkSerializer(many=True, read_only=True)
     class Meta:
         model = Profile
         fields = ( 'bio', 'location', 'birth_date','link')

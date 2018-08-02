@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Count
 from .models import Post
 from comments.models import Comment
-
+from comments.serializers import CommentSerializer
 
 class PostSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.username')
@@ -32,8 +32,9 @@ class PostSerializer(serializers.ModelSerializer):
         return Comment.objects.filter(parent=post).count()
 
     def get_top_comment(self,post):
-        return Comment.objects.filter(parent=post).annotate(
-            like_count=Count('likes')).order_by('-like_count').values().first()
+        data = Comment.objects.filter(parent=post).annotate(
+            like_count=Count('likes')).order_by('-like_count').first()
+        return CommentSerializer(data).data
    
     def get_likes_count(self,post):
         return post.likes_count()

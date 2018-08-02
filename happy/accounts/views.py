@@ -85,8 +85,7 @@ class UserPostsView(generics.ListAPIView):
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
-    permission_classes = (IsAuthenticatedOrReadOnly,
-                         IsOwnerOrReadOnlyUser, )
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
     @action(detail=True, methods=['get'])
     def posts(self, request, pk=None):
@@ -184,6 +183,7 @@ class FacebookLogin(SocialLoginView):
 
 class GetUserProfile(viewsets.ViewSet):
     serializer = UserDetailsSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def retrieve(self, request, username=None):
         queryset =  User.objects.all()

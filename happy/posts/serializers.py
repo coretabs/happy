@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 
+from django.db.models import Count
 from .models import Post
 from comments.models import Comment
 
@@ -10,7 +11,7 @@ class PostSerializer(serializers.ModelSerializer):
     comments_count = serializers.SerializerMethodField()
     likes_count = serializers.SerializerMethodField()
     dislikes_count = serializers.SerializerMethodField()
-
+    top_comment = serializers.SerializerMethodField()
     class Meta:
         extra_kwargs = {'likes': {'read_only': True},
                         'dislikes': {'read_only': True}
@@ -30,6 +31,10 @@ class PostSerializer(serializers.ModelSerializer):
 
         return Comment.objects.filter(parent=post).count()
 
+    def get_top_comment(self,post):
+        return Comment.objects.filter(parent=post).annotate(
+            like_count=Count('likes')).order_by('-like_count').values().first()
+   
     def get_likes_count(self,post):
         return post.likes_count()
 

@@ -1,6 +1,8 @@
 from .models import Comment, Reply, BaseComment
 from posts.models import Post
 from rest_framework import serializers
+from collections import OrderedDict
+
 
 
 class BaseCommentSerializer(serializers.ModelSerializer):
@@ -16,6 +18,13 @@ class BaseCommentSerializer(serializers.ModelSerializer):
 
     def get_dislikes_count(self, comment):
         return comment.dislikes_count()
+
+    def to_representation(self, instance):
+        ret = super(BaseCommentSerializer, self).to_representation(instance)
+        # Here we filter the null values and creates a new dictionary
+        # We use OrderedDict like in original method
+        ret = OrderedDict(list(filter(lambda x: x[1], ret.items())))
+        return ret
         
 class CommentSerializer(BaseCommentSerializer):
     replies_count = serializers.SerializerMethodField()
@@ -24,7 +33,9 @@ class CommentSerializer(BaseCommentSerializer):
 
     class Meta:
         model = Comment
-        fields = '__all__'
+        fields = ('id','created','modified','author','parent','content','likes','dislikes','likes_count',
+                                'dislikes_count','replies_count','replies')
+
         extra_kwargs = {'likes': {'read_only': True},
                        'dislikes': {'read_only': True},
                        'parent': {'read_only': True}}
@@ -37,27 +48,25 @@ class CommentSerializer(BaseCommentSerializer):
         data = Reply.objects.filter(parent=instance)
         return data.values()
 
-class ReplySerializer(BaseCommentSerializer):
-    base_comment = serializers.SerializerMethodField()
+class TopCommentSerializer(BaseCommentSerializer):
+    replies_count = serializers.SerializerMethodField()
     author = serializers.ReadOnlyField(source='author.username')
     
+    class Meta:
+        model = Comment
+        fields = ('id','author','content','likes','dislikes','parent','likes_count',
+                                'dislikes_count','replies_count','created','modified')
 
+    def get_replies_count(self, comment):
+        """ get the number of replies for single comment """
+        return Reply.objects.filter(parent=comment).count()
+    
+class ReplySerializer(BaseCommentSerializer):
+    author = serializers.ReadOnlyField(source='author.username')
     class Meta:
         model = Reply
         extra_kwargs = {'likes': {'read_only': True},
                        'dislikes': {'read_only': True},
                        'parent': {'read_only': True}}
         
-        fields =('base_comment','id','author','content','created',
-                                'modified','parent','likes_count',
-                                'dislikes_count','likes','dislikes')
-    def get_base_comment(self,instance):
-        data = Comment.objects.filter(pk = instance.parent_id)
-        return data.values()
-
-    def to_representation(self, instance):
-        data = super(ReplySerializer, self).to_representation(instance)
-        return {"Comment": data["base_comment"], "Replies":{"id":data['id'],'author':data["author"],'content':data["content"],
-                                                            'created':data["created"],'modified':data["modified"],'parent':data["parent"],
-                                                            'likes_count':data["likes_count"],'dislikes_count':data["dislikes_count"],
-                                                            'likes':data["likes"],'dislikes':data["dislikes"]}}
+        fields = '__all__'

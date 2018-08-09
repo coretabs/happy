@@ -159,8 +159,8 @@ class ReplyViewSet2(viewsets.ViewSet):
                           IsOwnerOrReadOnly,)
 
     def list(self, request, post_pk=None, comment_pk=None):
-        queryset = Reply.objects.filter(parent__parent=post_pk, parent_id=comment_pk)
-        serializer = ReplySerializer(queryset, many=True)
+        queryset = Comment.objects.filter(pk=comment_pk)
+        serializer = CommentSerializer(queryset, many=True)
         return Response(serializer.data)
     
     def create(self, request, post_pk=None, comment_pk=None):

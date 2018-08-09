@@ -1,10 +1,11 @@
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
+from collections import OrderedDict
 
 from django.db.models import Count
 from .models import Post
 from comments.models import Comment
-from comments.serializers import CommentSerializer
+from comments.serializers import TopCommentSerializer
 
 class PostSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.username')
@@ -17,7 +18,9 @@ class PostSerializer(serializers.ModelSerializer):
                         'dislikes': {'read_only': True}
         }
         model = Post
-        fields = '__all__'
+        fields = ("id","author","created","modified","content","likes",
+                                 "dislikes","likes_count","dislikes_count",
+                                 "mediafile","comments_count","top_comment")
 
     def validate(self,data):
         null = None
@@ -34,7 +37,7 @@ class PostSerializer(serializers.ModelSerializer):
     def get_top_comment(self,post):
         data = Comment.objects.filter(parent=post).annotate(
             like_count=Count('likes')).order_by('-like_count').first()
-        return CommentSerializer(data).data
+        return TopCommentSerializer(data).data
    
     def get_likes_count(self,post):
         return post.likes_count()
@@ -42,5 +45,13 @@ class PostSerializer(serializers.ModelSerializer):
     def get_dislikes_count(self, post):
         return post.dislikes_count()
 
+
+"""    def to_representation(self, instance):
+        ret = super(PostSerializer, self).to_representation(instance)
+        # Here we filter the null values and creates a new dictionary
+        # We use OrderedDict like in original method
+        ret = OrderedDict(list(filter(lambda x: x[1], ret.items())))
+        return ret
+"""
 
 

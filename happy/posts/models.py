@@ -44,6 +44,7 @@ class Post(models.Model):
        from django.utils.timesince import timesince
        if timesince(self.created).find("week"):
             return timesince(self.created).split(',')[0]
+        return timesince(self.created)
 
     def likes_count(self):
         return self.likes.count()

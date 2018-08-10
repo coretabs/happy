@@ -41,8 +41,8 @@ class Post(models.Model):
         return self.content[:50]
 
     def FORMAT(self):
-       from django.utils.timesince import timesince
-       if timesince(self.created).find("week"):
+        from django.utils.timesince import timesince
+        if timesince(self.created).find("week"):
             return timesince(self.created).split(',')[0]
         return timesince(self.created)
 

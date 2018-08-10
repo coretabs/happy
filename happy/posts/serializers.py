@@ -9,17 +9,18 @@ from comments.serializers import TopCommentSerializer
 
 class PostSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.username')
+    time_since = serializers.ReadOnlyField(source='FORMAT')
     comments_count = serializers.SerializerMethodField()
     likes_count = serializers.SerializerMethodField()
     dislikes_count = serializers.SerializerMethodField()
     top_comment = serializers.SerializerMethodField()
+    
     class Meta:
-        ordering = ['-date',]
         extra_kwargs = {'likes': {'read_only': True},
                         'dislikes': {'read_only': True}
         }
         model = Post
-        fields = ("id","author","created","modified","content","likes",
+        fields = ("id","author","time_since","created","modified","content","likes",
                                  "dislikes","likes_count","dislikes_count",
                                  "mediafile","comments_count","top_comment")
 

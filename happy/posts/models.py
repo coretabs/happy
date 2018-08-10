@@ -19,6 +19,7 @@ def content_file_name(instance, filename):
 
 
 class Post(models.Model):
+    time_since = models.DateTimeField(auto_now=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE,
@@ -33,9 +34,15 @@ class Post(models.Model):
                             validators=[validate_file_extension_and_size],
                             blank=True,
                             null=True)
+    class Meta:
+       ordering = ('-created',)
 
     def __str__(self):
         return self.content[:50]
+
+    def FORMAT(self):
+       from django.utils.timesince import timesince
+       return timesince(self.created) 
 
     def likes_count(self):
         return self.likes.count()

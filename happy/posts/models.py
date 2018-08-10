@@ -42,7 +42,8 @@ class Post(models.Model):
 
     def FORMAT(self):
        from django.utils.timesince import timesince
-       return timesince(self.created) 
+       if timesince(self.created).find("week"):
+            return timesince(self.created).split(',')[0]
 
     def likes_count(self):
         return self.likes.count()

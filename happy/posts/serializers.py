@@ -14,6 +14,7 @@ class PostSerializer(serializers.ModelSerializer):
     dislikes_count = serializers.SerializerMethodField()
     top_comment = serializers.SerializerMethodField()
     class Meta:
+        ordering = ['-date',]
         extra_kwargs = {'likes': {'read_only': True},
                         'dislikes': {'read_only': True}
         }

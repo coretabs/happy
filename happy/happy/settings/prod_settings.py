@@ -100,20 +100,11 @@ WSGI_APPLICATION = 'happy.wsgi.application'
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'd3r73dngq3jpl4',
-        'USER': 'cstqmomeqmdxtz',
-        'PASSWORD': 'a3a9f97a3d0259e193727fe0817e06776f9ce0df7f959f07983d039bd44a2443',
-        'HOST': 'ec2-107-21-236-219.compute-1.amazonaws.com',
-        'PORT': '5432',
-    }
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL')
+    )
 }
 
-...
-
-db_from_env = dj_database_url.config(conn_max_age=500)
-DATABASES['default'].update(db_from_env)
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators

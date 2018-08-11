@@ -12,7 +12,7 @@ As with any other django project, you have to migrate the database and then run 
 
 ```
 python manage.py migrate
-python manage.py runserver
+python manage.py runserver --settings=happy.local_settings
 
 ```
 runserver on localhost SSL:

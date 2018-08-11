@@ -19,6 +19,7 @@ gunicorn==19.9.0
 idna==2.7
 oauthlib==2.1.0
 Pillow==5.2.0
+psycopg2==2.7.2
 pycparser==2.18
 PyJWT==1.6.4
 pyOpenSSL==18.0.0

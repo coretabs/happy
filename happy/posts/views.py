@@ -60,7 +60,7 @@ class PostViewSet2(viewsets.ViewSet):
 
     def list(self, request,):
         queryset = Post.objects.filter()
-        serializer = PostSerializer(queryset, many=True)
+        serializer = PostSerializer(queryset, many=True, context={"request":request})
         return Response(serializer.data)
     
     def create(self, request):

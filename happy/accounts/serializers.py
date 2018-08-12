@@ -7,7 +7,6 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 from django.template.defaultfilters import filesizeformat
-
 from rest_framework import serializers
 from rest_framework import serializers, exceptions
 from rest_auth.registration.serializers import RegisterSerializer as RS
@@ -38,10 +37,34 @@ class ListUserSociaLinkSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     """a serializer for our user profile objects"""
     link  = ListUserSociaLinkSerializer(many=True, read_only=True)
+    
     class Meta:
         model = Profile
-        fields = ( 'bio', 'location', 'birth_date','link')
-        
+        fields = ( 'first_name','last_name','displayed_name','bio', 'location', 'birth_date','link')
+        extra_kwargs = {
+                    'first_name':{'write_only':True},
+                    'last_name':{'write_only':True},
+                    'displayed_name':{'read_only':True}}
+
+    def validate(self, data):
+        pattern = "^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ðء-ي]+[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ðء-ي]+[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ðء-ي]*$"
+        compiler = re.compile(pattern)
+        if not compiler.match(data["first_name"]):
+            raise serializers.ValidationError(
+                _("Make sure it contains only letters."))
+        if not compiler.match(data["last_name"]):
+            raise serializers.ValidationError(
+                _("Make sure it contains only letters."))
+            
+        return data
+
+class DisplayUserName(serializers.ModelSerializer):
+    display_name = serializers.ReadOnlyField(source='displayed_name')
+
+    class Meta:
+        model = Profile
+        fields = ('display_name',)
+
 class UserSocialLinksSerializer(serializers.ModelSerializer):
     
     class Meta:
@@ -52,7 +75,6 @@ class UserSerializer(serializers.ModelSerializer):
 
     posts = serializers.HyperlinkedRelatedField(many=True, read_only=True,
                                                 view_name='apiv1:post-detail')
-
     class Meta:
         model = User
         fields = ('username', 'email', 'password', 'posts')
@@ -203,13 +225,10 @@ class UserDetailsSerializer(serializers.ModelSerializer):
     avatar_url = serializers.SerializerMethodField()
     profile = ProfileSerializer()
     avatar = serializers.ImageField(write_only=True, required=False)
-    name = serializers.CharField(source='first_name',
-                                 max_length=100,
-                                 min_length=5)
 
     class Meta:
         model = UserModel
-        fields = ('username', 'email', 'email_status', 'name', 'profile', 'avatar', 'avatar_url', 'posts')
+        fields = ('username', 'email', 'email_status', 'profile', 'avatar', 'avatar_url', 'posts')
 
     def get_email_status(self, obj):
         email_address = EmailAddress.objects.get(user=obj)
@@ -223,7 +242,7 @@ class UserDetailsSerializer(serializers.ModelSerializer):
                 return avatar_url
 
     def validate_name(self, name):
-        pattern = "^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ðء-ي]+ [a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ðء-ي]+[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ðء-ي ]*$"
+        pattern = "^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ðء-ي]+[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ðء-ي]+[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ðء-ي]*$"
         compiler = re.compile(pattern)
         if not compiler.match(name):
             raise serializers.ValidationError(
@@ -270,12 +289,18 @@ class UserDetailsSerializer(serializers.ModelSerializer):
             bio = profile.get("bio")
             location = profile.get("location")
             birth_date = profile.get("birth_date")
+            first_name = profile.get("first_name")
+            last_name = profile.get("last_name")
             if bio and bio != instance.profile.bio :
                 instance.profile.bio = bio
             if location and location != instance.profile.location:
                 instance.profile.location = location
             if birth_date and birth_date != instance.profile.birth_date:
                 instance.profile.birth_date = birth_date 
+            if first_name and first_name != instance.profile.first_name:
+                instance.profile.first_name = first_name
+            if last_name and last_name != instance.profile.last_name:
+                instance.profile.last_name = last_name  
 
         email = validated_data.get('email', None)
         if email and email != instance.email:

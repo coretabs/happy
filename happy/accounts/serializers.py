@@ -128,7 +128,8 @@ class LoginSerializer(LS):
         # If required, is the email verified?
         email_address = user.emailaddress_set.get(email=user.email)
         if not email_address.verified:
-            raise exceptions.PermissionDenied('not verified')
+            pass
+            #raise exceptions.PermissionDenied('not verified')
 
         attrs['user'] = user
         return attrs

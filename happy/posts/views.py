@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import permissions
 from .models import Post
-from .serializers import PostSerializer
+from .serializers import PostSerializer, SinglePostSerializer
 from comments.models import Comment, Reply
 from comments.serializers import CommentSerializer, ReplySerializer
 from rest_framework import status
@@ -119,3 +119,44 @@ class PostViewSet2(viewsets.ViewSet):
                 post.likes.remove(request.user)
             post.dislikes.add(request.user)
             return Response("Dislike has been added")
+
+class GetSinglePost(viewsets.ViewSet):
+    serializer = SinglePostSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,IsOwnerOrReadOnly,)
+
+    def retrieve(self, request, pk=None):
+        queryset =  Post.objects.all()
+        user =  get_object_or_404(queryset, pk=pk)        
+        serializer = SinglePostSerializer(user, context={'request': request})
+        return Response(serializer.data)
+
+    def update(self, request, pk=None):
+        post =  Post.objects.get(pk=pk)
+        serializer = PostSerializer(data=request.data, instance=post)
+        if serializer.is_valid():
+            post = serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def destroy(self, request, pk=None):
+        try:
+            post =  Post.objects.get(pk=pk)
+        except KeyError:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        except ValueError:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        post.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    @action(detail=True, methods=['get'])
+    def like(self, request , pk=None):
+        post = Post.objects.get(pk=pk)
+        if post.likes.filter(id=request.user.id).exists():
+            post.likes.remove(request.user)
+            return Response("Like has been removed")
+        else: 
+            if post.dislikes.filter(id=request.user.id).exists():
+                post.dislikes.remove(request.user)
+            post.likes.add(request.user)
+            return Response("Like has been added")

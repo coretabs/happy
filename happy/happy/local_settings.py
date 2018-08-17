@@ -177,8 +177,7 @@ AUTHENTICATION_BACKENDS = (
 
 SITE_ID = 1
 
-EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
+#EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 
 AVATAR_CLEANUP_DELETED = True
 
@@ -246,3 +245,12 @@ REST_AUTH_SERIALIZERS = {
 REST_AUTH_REGISTER_SERIALIZERS = {
     'REGISTER_SERIALIZER': 'accounts.serializers.RegisterSerializer',
     }
+
+# EMAIL CONFIGURATION
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'coretabstchi@gmail.com'
+EMAIL_HOST_PASSWORD = 'fethitchi'
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")

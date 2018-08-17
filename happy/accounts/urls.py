@@ -24,8 +24,8 @@ urlpatterns = [
     path(r'user/posts/', UserPostsView.as_view()),
     path(r'registration/', include('rest_auth.registration.urls')),
     path(r'confirmation/', resend_confirmation_view),
-    #path(r'registration/verify-email/', verify_email),
-
+    # path(r'registration/verify-email/', verify_email),
+    # path(r'account-confirm-email/(?P<key>[-:\w]+)/$',allauthemailconfirmation),
     path(r'user/<username>/', GetUserProfile.as_view({'get': 'retrieve'})),
 
 ]

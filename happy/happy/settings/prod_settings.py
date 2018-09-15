@@ -27,7 +27,15 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+# CORS and Session
+
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
+
+# CSRF and Session
+SESSION_COOKIE_DOMAIN = '127.0.0.1'
+CSRF_COOKIE_DOMAIN = '127.0.0.1'
+
 
 
 # Application definition

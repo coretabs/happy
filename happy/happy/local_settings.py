@@ -82,6 +82,11 @@ CORS_ALLOW_CREDENTIALS = True
 SESSION_COOKIE_DOMAIN = '127.0.0.1'
 CSRF_COOKIE_DOMAIN = '127.0.0.1'
 
+from corsheaders.defaults import default_headers
+
+CORS_ALLOW_HEADERS = default_headers + (
+    'token',
+)
 
 ROOT_URLCONF = 'happy.urls'
 

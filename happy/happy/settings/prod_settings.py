@@ -35,6 +35,8 @@ CORS_ALLOW_CREDENTIALS = True
 # CSRF and Session
 SESSION_COOKIE_DOMAIN = 'corefun.herokuapp.com'
 CSRF_COOKIE_DOMAIN = 'corefun.herokuapp.com'
+CSRF_TRUSTED_ORIGINS = ['corefun.herokuapp.com']
+
 
 
 

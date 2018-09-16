@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     
     'corsheaders',
 
+    'storages',
+
     'rest_framework',
     'rest_framework.authtoken',
     'rest_auth',
@@ -74,6 +76,12 @@ MIDDLEWARE = [
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
+
+# CSRF and Session
+SESSION_COOKIE_DOMAIN = '127.0.0.1'
+CSRF_COOKIE_DOMAIN = '127.0.0.1'
+
 
 ROOT_URLCONF = 'happy.urls'
 
@@ -142,11 +150,17 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+AWS_ACCESS_KEY_ID = 'AKIAIJKLH7UO7RWIRE2A'
+AWS_SECRET_ACCESS_KEY = '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'
+AWS_STORAGE_BUCKET_NAME = 'corefun2'
+
+#STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'happy/media/')
+#MEDIA_ROOT = os.path.join(BASE_DIR, 'happy/media/')
 
 
 # REST framework

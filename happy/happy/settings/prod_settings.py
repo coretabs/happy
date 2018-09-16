@@ -33,8 +33,8 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
 # CSRF and Session
-SESSION_COOKIE_DOMAIN = 'afun.herok'
-CSRF_COOKIE_DOMAIN = '127.0.0.1'
+SESSION_COOKIE_DOMAIN = 'corefun.herokuapp.com'
+CSRF_COOKIE_DOMAIN = 'corefun.herokuapp.com'
 
 
 

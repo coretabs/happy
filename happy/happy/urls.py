@@ -18,20 +18,13 @@ from django.contrib import admin
 from django.views.generic import TemplateView
 
 from rest_framework import routers
-from accounts.views import UserViewSet, UserSocialLinksViewSet
-from posts.views import PostViewSet
-from comments.views import CommentViewSet, ReplyViewSet
+from accounts.views import UserSocialLinksViewSet
 
 
 # from fun.routers import router
 
 router = routers.DefaultRouter()
-router.register('users', UserViewSet)
 router.register('social', UserSocialLinksViewSet)
-router.register(r'posts', PostViewSet)
-router.register(r'comments', CommentViewSet)
-router.register(f'replies', ReplyViewSet)
-
 
 
 urlpatterns = [
@@ -48,7 +41,7 @@ urlpatterns = [
     path(r'accounts/', include('allauth.urls')),
     path(r'avatar/', include('avatar.urls')),
     
-    path(r'api/v1/nested/', include('posts.urls')),
+    path(r'api/v1/', include('posts.urls')),
 
 ]
 

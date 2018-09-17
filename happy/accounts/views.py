@@ -82,25 +82,6 @@ class UserPostsView(generics.ListAPIView):
         return posts
 
 
-class UserViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = UserSerializer
-    queryset = User.objects.all()
-    permission_classes = (IsAuthenticatedOrReadOnly,)
-
-    @action(detail=True, methods=['get'])
-    def posts(self, request, pk=None):
-        posts = Post.objects.filter(author_id=pk)
-        context = {'request': request}
-        serializer = PostSerializer(posts, context=context, many=True)
-        return Response(serializer.data)
-
-    @action(detail=True, methods=['get'])
-    def profile(self, request, pk=None):
-        profile = Profile.objects.filter(user_id=pk)
-        context = {'request': request}
-        serializer = ProfileSerializer(profile, context=context, many=True)
-        return Response(serializer.data)
-
 class UserDetailsView(RetrieveUpdateAPIView):
 
     serializer_class = UserDetailsSerializer

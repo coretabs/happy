@@ -199,9 +199,14 @@ SITE_ID = 1
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
 
+# AVATAR SETTINGS
 AVATAR_CLEANUP_DELETED = True
-
 AVATAR_MAX_AVATARS_PER_USER = 1
+AVATAR_PROVIDERS =(
+    'avatar.providers.PrimaryAvatarProvider',
+    'avatar.providers.GravatarAvatarProvider',
+    'avatar.providers.DefaultAvatarProvider',
+)
 
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 

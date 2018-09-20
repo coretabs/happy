@@ -33,7 +33,7 @@ class PostViewSet2(viewsets.ViewSet):
         queryset =  Post.objects.all()
         post =  get_object_or_404(queryset, pk=pk)
         # post =  Post.objects.get(pk=pk)
-        serializer = SinglePostSerializer(post)
+        serializer = SinglePostSerializer(post,context={"request":request})
         return Response(serializer.data)
     
     def update(self, request, pk=None):

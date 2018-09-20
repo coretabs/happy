@@ -2,7 +2,8 @@ from .models import Comment, Reply, BaseComment
 from posts.models import Post
 from rest_framework import serializers
 from collections import OrderedDict
-
+from django.conf import settings
+from django.utils.module_loading import import_string
 
 
 class BaseCommentSerializer(serializers.ModelSerializer):
@@ -30,16 +31,24 @@ class CommentSerializer(BaseCommentSerializer):
     replies_count = serializers.SerializerMethodField()
     replies = serializers.SerializerMethodField()
     author = serializers.ReadOnlyField(source='author.username')
+    author_avatar = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
-        fields = ('id','created','modified','author','parent','content','likes','dislikes','likes_count',
+        fields = ('id','created','modified','author', "author_avatar",'parent','content','likes','dislikes','likes_count',
                                 'dislikes_count','replies_count','replies')
 
         extra_kwargs = {'likes': {'read_only': True},
                        'dislikes': {'read_only': True},
                        'parent': {'read_only': True}}
-
+    
+    def get_author_avatar(self, obj, size=settings.AVATAR_DEFAULT_SIZE):
+        for provider_path in settings.AVATAR_PROVIDERS:
+            provider = import_string(provider_path)
+            avatar_url = provider.get_avatar_url(obj.author, size)
+            if avatar_url:
+                return avatar_url
+    
     def get_replies_count(self, comment):
         """ get the number of replies for single comment """
         return Reply.objects.filter(parent=comment).count()
@@ -51,22 +60,40 @@ class CommentSerializer(BaseCommentSerializer):
 class TopCommentSerializer(BaseCommentSerializer):
     replies_count = serializers.SerializerMethodField()
     author = serializers.ReadOnlyField(source='author.username')
+    author_avatar = serializers.SerializerMethodField()
     
     class Meta:
         model = Comment
-        fields = ('id','author','content','likes','dislikes','parent','likes_count',
+        fields = ('id','author', "author_avatar",'content','likes','dislikes','parent','likes_count',
                                 'dislikes_count','replies_count','created','modified')
-
+    
+    def get_author_avatar(self, obj, size=settings.AVATAR_DEFAULT_SIZE):
+        for provider_path in settings.AVATAR_PROVIDERS:
+            provider = import_string(provider_path)
+            avatar_url = provider.get_avatar_url(obj.author, size)
+            if avatar_url:
+                return avatar_url
+    
     def get_replies_count(self, comment):
         """ get the number of replies for single comment """
         return Reply.objects.filter(parent=comment).count()
     
 class ReplySerializer(BaseCommentSerializer):
     author = serializers.ReadOnlyField(source='author.username')
+    author_avatar = serializers.SerializerMethodField()
+
     class Meta:
         model = Reply
         extra_kwargs = {'likes': {'read_only': True},
                        'dislikes': {'read_only': True},
                        'parent': {'read_only': True}}
         
-        fields = '__all__'
+        fields = ('id','created','modified','author', "author_avatar",'content','likes','dislikes','likes_count',
+                                'dislikes_count')
+    
+    def get_author_avatar(self, obj, size=settings.AVATAR_DEFAULT_SIZE):
+        for provider_path in settings.AVATAR_PROVIDERS:
+            provider = import_string(provider_path)
+            avatar_url = provider.get_avatar_url(obj.author, size)
+            if avatar_url:
+                return avatar_url

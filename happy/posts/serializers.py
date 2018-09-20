@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 from collections import OrderedDict
+from django.conf import settings
+from django.utils.module_loading import import_string
 
 from django.db.models import Count
 from .models import Post
@@ -9,6 +11,7 @@ from comments.serializers import TopCommentSerializer, CommentSerializer
 
 class PostSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.username')
+    author_avatar = serializers.SerializerMethodField()
     time_since = serializers.ReadOnlyField(source='FORMAT')
     comments_count = serializers.SerializerMethodField()
     likes_count = serializers.SerializerMethodField()
@@ -20,9 +23,16 @@ class PostSerializer(serializers.ModelSerializer):
                         'dislikes': {'read_only': True}
         }
         model = Post
-        fields = ("id","author","time_since","created","modified","content","likes",
+        fields = ("id","author","author_avatar","time_since","created","modified","content","likes",
                                  "dislikes","likes_count","dislikes_count",
                                  "mediafile","comments_count","top_comment")
+
+    def get_author_avatar(self, obj, size=settings.AVATAR_DEFAULT_SIZE):
+        for provider_path in settings.AVATAR_PROVIDERS:
+            provider = import_string(provider_path)
+            avatar_url = provider.get_avatar_url(obj.author, size)
+            if avatar_url:
+                return self.context['request'].build_absolute_uri(avatar_url)
 
     def validate(self,data):
         null = None
@@ -58,6 +68,7 @@ class PostSerializer(serializers.ModelSerializer):
 
 class SinglePostSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.username')
+    author_avatar = serializers.SerializerMethodField()
     time_since = serializers.ReadOnlyField(source='FORMAT')
     comments_count = serializers.SerializerMethodField()
     likes_count = serializers.SerializerMethodField()
@@ -69,7 +80,7 @@ class SinglePostSerializer(serializers.ModelSerializer):
                         'dislikes': {'read_only': True}
         }
         model = Post
-        fields = ("id","author","time_since","created","modified","content","likes",
+        fields = ("id","author", "author_avatar","time_since","created","modified","content","likes",
                                  "dislikes","likes_count","dislikes_count",
                                  "mediafile","comments_count","comments")
 
@@ -79,7 +90,13 @@ class SinglePostSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(u'at least one field is required')
         return data
 
-
+    def get_author_avatar(self, obj, size=settings.AVATAR_DEFAULT_SIZE):
+        for provider_path in settings.AVATAR_PROVIDERS:
+            provider = import_string(provider_path)
+            avatar_url = provider.get_avatar_url(obj.author, size)
+            if avatar_url:
+                return self.context['request'].build_absolute_uri(avatar_url)
+    
     def get_comments_count(self, post):
         """ get the number of comments for single post """
         return Comment.objects.filter(parent=post).count()

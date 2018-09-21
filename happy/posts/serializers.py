@@ -49,7 +49,11 @@ class PostSerializer(serializers.ModelSerializer):
     def get_top_comment(self,post):
         data = Comment.objects.filter(parent=post).annotate(
             like_count=Count('likes')).order_by('-like_count').first()
-        return TopCommentSerializer(data).data
+        serializer = TopCommentSerializer(data).data
+        if data == None:
+            return None
+        else:
+            return serializer
    
     def get_likes_count(self,post):
         return post.likes_count()

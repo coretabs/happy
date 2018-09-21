@@ -32,7 +32,7 @@ class PostSerializer(serializers.ModelSerializer):
             provider = import_string(provider_path)
             avatar_url = provider.get_avatar_url(obj.author, size)
             if avatar_url:
-                return self.context['request'].build_absolute_uri(avatar_url)
+                return avatar_url
 
     def validate(self,data):
         null = None
@@ -95,7 +95,7 @@ class SinglePostSerializer(serializers.ModelSerializer):
             provider = import_string(provider_path)
             avatar_url = provider.get_avatar_url(obj.author, size)
             if avatar_url:
-                return self.context['request'].build_absolute_uri(avatar_url)
+                return avatar_url
     
     def get_comments_count(self, post):
         """ get the number of comments for single post """

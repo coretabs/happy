@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
+import datetime
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -44,7 +45,7 @@ INSTALLED_APPS = [
     'storages',
 
     'rest_framework',
-    'rest_framework.authtoken',
+    #'rest_framework.authtoken',
     'rest_auth',
     'rest_auth.registration',
     
@@ -79,8 +80,8 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
 # CSRF and Session
-SESSION_COOKIE_DOMAIN = '127.0.0.1'
-CSRF_COOKIE_DOMAIN = '127.0.0.1'
+#SESSION_COOKIE_DOMAIN = '127.0.0.1'
+#CSRF_COOKIE_DOMAIN = '127.0.0.1'
 
 from corsheaders.defaults import default_headers
 
@@ -172,8 +173,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'happy/media/')
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        #'rest_framework.authentication.BasicAuthentication',
+        #'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
@@ -270,6 +271,13 @@ REST_AUTH_SERIALIZERS = {
 REST_AUTH_REGISTER_SERIALIZERS = {
     'REGISTER_SERIALIZER': 'accounts.serializers.RegisterSerializer',
     }
+
+JWT_AUTH = {
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
+    'JWT_ALLOW_REFRESH': True,
+}
+
+REST_USE_JWT = True
 
 # EMAIL CONFIGURATION
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

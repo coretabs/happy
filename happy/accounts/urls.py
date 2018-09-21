@@ -3,7 +3,7 @@ from avatars.views import upload_avatar_view
 
 
 from allauth.account.views import confirm_email as allauthemailconfirmation
-from rest_framework_jwt.views import obtain_jwt_token
+from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 
 from .views import (FacebookLogin, 
                    UserProfileView,
@@ -17,6 +17,7 @@ urlpatterns = [
     path(r'', include('rest_auth.urls')),
     path(r'facebook/', FacebookLogin.as_view(), name='fb_login'),
     path(r'token/', obtain_jwt_token),
+    path(r'refresh-token/', refresh_jwt_token),
     path(r'logout/', logout_view),
     path(r'user/', user_details_view),
     path(r'user/avatar/', upload_avatar_view),

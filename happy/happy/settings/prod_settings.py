@@ -34,9 +34,9 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
 # CSRF and Session
-SESSION_COOKIE_DOMAIN = 'corefun.herokuapp.com'
-CSRF_COOKIE_DOMAIN = 'corefun.herokuapp.com'
-CSRF_TRUSTED_ORIGINS = ['corefun.herokuapp.com']
+#SESSION_COOKIE_DOMAIN = 'corefun.herokuapp.com'
+#CSRF_COOKIE_DOMAIN = 'corefun.herokuapp.com'
+#CSRF_TRUSTED_ORIGINS = ['corefun.herokuapp.com']
 
 
 
@@ -55,7 +55,7 @@ INSTALLED_APPS = [
     'corsheaders',
 
     'rest_framework',
-    'rest_framework.authtoken',
+    #'rest_framework.authtoken',
     'rest_auth',
     'rest_auth.registration',
     
@@ -281,5 +281,9 @@ EMAIL_HOST_PASSWORD = 'fethitchi'
 
 # JWT configuration
 JWT_AUTH = {
-    'JWT_EXPIRATION_DELTA' : datetime.timedelta(seconds=604800),
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
+    'JWT_ALLOW_REFRESH': True,
+    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
 }
+
+REST_USE_JWT = True

@@ -24,8 +24,13 @@ class BaseComment(models.Model):
         return self.likes.count()
 
     def dislikes_count(self):
-      return self.dislikes.count()
-
+        return self.dislikes.count()
+    
+    def FORMAT(self):
+        from django.utils.timesince import timesince
+        if timesince(self.created).find("week"):
+            return timesince(self.created).split(',')[0]
+        return timesince(self.created)
 
 class Comment(BaseComment):
     parent = models.ForeignKey(Post, on_delete=models.CASCADE,

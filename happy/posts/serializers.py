@@ -23,7 +23,7 @@ class PostSerializer(serializers.ModelSerializer):
                         'dislikes': {'read_only': True}
         }
         model = Post
-        fields = ("id","author","author_avatar","time_since","created","modified",
+        fields = ("id","author","author_avatar","time_since",
                   "content","likes","dislikes","likes_count","dislikes_count",
                   "mediafile","comments_count","top_comment")
 
@@ -75,8 +75,8 @@ class SinglePostSerializer(serializers.ModelSerializer):
     author_avatar = serializers.SerializerMethodField()
     time_since = serializers.ReadOnlyField(source='FORMAT')
     comments_count = serializers.SerializerMethodField()
-    likes_count = serializers.SerializerMethodField()
-    dislikes_count = serializers.SerializerMethodField()
+    likes_count = serializers.ReadOnlyField()
+    dislikes_count = serializers.ReadOnlyField()
     comments = serializers.SerializerMethodField()
     
     class Meta:
@@ -84,7 +84,7 @@ class SinglePostSerializer(serializers.ModelSerializer):
                         'dislikes': {'read_only': True}
         }
         model = Post
-        fields = ("id","author", "author_avatar","time_since","created","modified",
+        fields = ("id","author", "author_avatar","time_since",
                   "content","likes","dislikes","likes_count","dislikes_count",
                   "mediafile","comments_count","comments")
 
@@ -108,11 +108,5 @@ class SinglePostSerializer(serializers.ModelSerializer):
     def get_comments(self,post):
         data = Comment.objects.all().filter(parent=post)
         return CommentSerializer(data, many=True).data
-   
-    def get_likes_count(self,post):
-        return post.likes_count()
-
-    def get_dislikes_count(self, post):
-        return post.dislikes_count()
 
 

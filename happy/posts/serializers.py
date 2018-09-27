@@ -23,9 +23,9 @@ class PostSerializer(serializers.ModelSerializer):
                         'dislikes': {'read_only': True}
         }
         model = Post
-        fields = ("id","author","author_avatar","time_since","created","modified","content","likes",
-                                 "dislikes","likes_count","dislikes_count",
-                                 "mediafile","comments_count","top_comment")
+        fields = ("id","author","author_avatar","time_since","created","modified",
+                  "content","likes","dislikes","likes_count","dislikes_count",
+                  "mediafile","comments_count","top_comment")
 
     def get_author_avatar(self, obj, size=settings.AVATAR_DEFAULT_SIZE):
         for provider_path in settings.AVATAR_PROVIDERS:
@@ -84,9 +84,9 @@ class SinglePostSerializer(serializers.ModelSerializer):
                         'dislikes': {'read_only': True}
         }
         model = Post
-        fields = ("id","author", "author_avatar","time_since","created","modified","content","likes",
-                                 "dislikes","likes_count","dislikes_count",
-                                 "mediafile","comments_count","comments")
+        fields = ("id","author", "author_avatar","time_since","created","modified",
+                  "content","likes","dislikes","likes_count","dislikes_count",
+                  "mediafile","comments_count","comments")
 
     def validate(self,data):
         null = None

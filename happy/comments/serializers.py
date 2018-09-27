@@ -29,14 +29,17 @@ class BaseCommentSerializer(serializers.ModelSerializer):
         
 class CommentSerializer(BaseCommentSerializer):
     replies_count = serializers.SerializerMethodField()
+    likes_count = serializers.SerializerMethodField()
+    dislikes_count = serializers.SerializerMethodField()
     replies = serializers.SerializerMethodField()
     author = serializers.ReadOnlyField(source='author.username')
     author_avatar = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
-        fields = ('id','created','modified','author', "author_avatar",'parent','content','likes','dislikes','likes_count',
-                                'dislikes_count','replies_count','replies')
+        fields = ('id','created','modified','author', "author_avatar",'parent','content',
+                  'likes','dislikes','likes_count','dislikes_count','replies_count',
+                  'replies')
 
         extra_kwargs = {'likes': {'read_only': True},
                        'dislikes': {'read_only': True},
@@ -55,7 +58,14 @@ class CommentSerializer(BaseCommentSerializer):
 
     def get_replies(self, instance):
         data = Reply.objects.filter(parent=instance)
-        return data.values()
+        serializer = ReplySerializer(data, many=True).data
+        return serializer
+    
+    def get_likes_count(self,comment):
+            return comment.likes_count()
+
+    def get_dislikes_count(self, comment):
+        return comment.dislikes_count()
 
 class TopCommentSerializer(BaseCommentSerializer):
     replies_count = serializers.SerializerMethodField()
@@ -64,8 +74,9 @@ class TopCommentSerializer(BaseCommentSerializer):
     
     class Meta:
         model = Comment
-        fields = ('id','author', "author_avatar",'content','likes','dislikes','parent','likes_count',
-                                'dislikes_count','replies_count','created','modified')
+        fields = ('id','author', "author_avatar",'content','likes','dislikes',
+                  'parent','likes_count','dislikes_count','replies_count',
+                  'created','modified')
     
     def get_author_avatar(self, obj, size=settings.AVATAR_DEFAULT_SIZE):
         for provider_path in settings.AVATAR_PROVIDERS:
@@ -81,6 +92,8 @@ class TopCommentSerializer(BaseCommentSerializer):
 class ReplySerializer(BaseCommentSerializer):
     author = serializers.ReadOnlyField(source='author.username')
     author_avatar = serializers.SerializerMethodField()
+    likes_count = serializers.SerializerMethodField()
+    dislikes_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Reply
@@ -88,8 +101,8 @@ class ReplySerializer(BaseCommentSerializer):
                        'dislikes': {'read_only': True},
                        'parent': {'read_only': True}}
         
-        fields = ('id','created','modified','author', "author_avatar",'content','likes','dislikes','likes_count',
-                                'dislikes_count')
+        fields = ('id','created','modified','author', "author_avatar",'content',
+                  'likes','dislikes','likes_count','dislikes_count')
     
     def get_author_avatar(self, obj, size=settings.AVATAR_DEFAULT_SIZE):
         for provider_path in settings.AVATAR_PROVIDERS:
@@ -97,3 +110,9 @@ class ReplySerializer(BaseCommentSerializer):
             avatar_url = provider.get_avatar_url(obj.author, size)
             if avatar_url:
                 return avatar_url
+    
+    def get_likes_count(self,reply):
+        return reply.likes_count()
+
+    def get_dislikes_count(self, reply):
+        return reply.dislikes_count()

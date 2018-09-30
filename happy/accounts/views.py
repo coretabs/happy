@@ -10,6 +10,8 @@ from django.shortcuts import get_object_or_404
 
 from posts.serializers import PostSerializer
 from posts.models import Post
+from posts.pagination import PostsLimitOffsetPagination, PostsPageNumberPagination
+
 
 # from rest_framework import permissions
 from allauth.account.views import PasswordResetFromKeyView as PRV
@@ -75,11 +77,14 @@ class UserSocialLinksViewSet(viewsets.ModelViewSet):
 
 class UserPostsView(generics.ListAPIView):
     serializer_class = PostSerializer
+    pagination_class = PostsPageNumberPagination
 
     def get_queryset(self):
         user = self.request.user
         posts = Post.objects.filter(author_id=user.id)
         return posts
+    
+    
 
 
 class UserDetailsView(RetrieveUpdateAPIView):

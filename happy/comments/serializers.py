@@ -4,6 +4,7 @@ from rest_framework import serializers
 from collections import OrderedDict
 from django.conf import settings
 from django.utils.module_loading import import_string
+from posts.pagination import CommentsPageNumberPagination, PostsPageNumberPagination
 
 
 class BaseCommentSerializer(serializers.ModelSerializer):
@@ -29,6 +30,36 @@ class BaseCommentSerializer(serializers.ModelSerializer):
         return ret
         """
 class CommentSerializer(BaseCommentSerializer):
+    author = serializers.ReadOnlyField(source='author.username')
+    author_avatar = serializers.SerializerMethodField()
+    time_since = serializers.ReadOnlyField(source='FORMAT')
+    likes_count = serializers.ReadOnlyField()
+    dislikes_count = serializers.ReadOnlyField()
+    replies_count = serializers.SerializerMethodField()
+    
+
+    class Meta:
+        model = Comment
+        fields = ('id','author', "author_avatar","time_since",'parent','content',
+                  'likes','dislikes','likes_count','dislikes_count','replies_count')
+
+        extra_kwargs = {'likes': {'read_only': True},
+                       'dislikes': {'read_only': True},
+                       'parent': {'read_only': True}}
+    
+    def get_author_avatar(self, obj, size=settings.AVATAR_DEFAULT_SIZE):
+        for provider_path in settings.AVATAR_PROVIDERS:
+            provider = import_string(provider_path)
+            avatar_url = provider.get_avatar_url(obj.author, size)
+            if avatar_url:
+                return avatar_url
+    
+    def get_replies_count(self, comment):
+        """ get the number of replies for single comment """
+        return Reply.objects.filter(parent=comment).count()
+
+
+class CommentSerializerInsidePostInstance(BaseCommentSerializer):
     author = serializers.ReadOnlyField(source='author.username')
     author_avatar = serializers.SerializerMethodField()
     time_since = serializers.ReadOnlyField(source='FORMAT')
@@ -61,10 +92,12 @@ class CommentSerializer(BaseCommentSerializer):
 
     def get_replies(self, instance):
         data = Reply.objects.filter(parent=instance)
-        serializer = ReplySerializer(data, many=True).data
-        return serializer
+        paginator = CommentsPageNumberPagination()
+        page = paginator.paginate_queryset(data, self.context['request'])
+        serializer = ReplySerializer(page, many=True).data
+        return paginator.get_paginated_response(serializer).data
 
-
+        
 class TopCommentSerializer(BaseCommentSerializer):
     # replies_count = serializers.SerializerMethodField()
     author = serializers.ReadOnlyField(source='author.username')
@@ -100,7 +133,7 @@ class ReplySerializer(BaseCommentSerializer):
                        'dislikes': {'read_only': True},
                        'parent': {'read_only': True}}
         
-        fields = ('id','author', "author_avatar",'content',
+        fields = ('id','author', "author_avatar",'content','parent',
                   'likes','dislikes','likes_count','dislikes_count',"time_since")
     
     def get_author_avatar(self, obj, size=settings.AVATAR_DEFAULT_SIZE):

@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from collections import OrderedDict
 from django.conf import settings
 from django.utils.module_loading import import_string
+from posts.pagination import CommentsPageNumberPagination, PostsPageNumberPagination
 
 from django.db.models import Count
 from .models import Post
@@ -105,8 +106,13 @@ class SinglePostSerializer(serializers.ModelSerializer):
         """ get the number of comments for single post """
         return Comment.objects.filter(parent=post).count()
 
-    def get_comments(self,post):
-        data = Comment.objects.all().filter(parent=post)
-        return CommentSerializer(data, many=True).data
+    def get_comments(self, post):
+        
+        data = Comment.objects.filter(parent=post)
+        paginator = CommentsPageNumberPagination()
+        page = paginator.paginate_queryset(data, self.context['request'])
+        serializer = CommentSerializer(page, many=True).data
+        return paginator.get_paginated_response(serializer).data
+
 
 

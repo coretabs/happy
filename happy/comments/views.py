@@ -7,18 +7,27 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 
 from .models import Comment, Reply
+from posts.pagination import CommentsPageNumberPagination, PostsPageNumberPagination
 
-from .serializers import CommentSerializer, ReplySerializer
+
+from .serializers import CommentSerializer, CommentSerializerInsidePostInstance, ReplySerializer
 
 
-class CommentViewSet2(viewsets.ViewSet):
+class CommentViewSet2(viewsets.ModelViewSet):
+    queryset = Comment.objects.filter()
     serializer_class = CommentSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,
                           IsOwnerOrReadOnly,)
+    pagination_class = PostsPageNumberPagination
 
     def list(self, request, post_pk=None):
         queryset = Comment.objects.filter(parent_id=post_pk)
-        serializer = CommentSerializer(queryset, many=True)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context={"request":request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True, context={"request":request})
         return Response(serializer.data)
     
     def create(self, request, post_pk=None):
@@ -31,7 +40,7 @@ class CommentViewSet2(viewsets.ViewSet):
     def retrieve(self, request, pk=None, post_pk=None):
         queryset =  Comment.objects.filter()
         comment =  get_object_or_404(queryset, pk=pk)
-        serializer = CommentSerializer(comment)
+        serializer = CommentSerializerInsidePostInstance(comment, context={"request":request})
         return Response(serializer.data)
     
     def update(self, request, pk=None, post_pk=None):
@@ -78,15 +87,26 @@ class CommentViewSet2(viewsets.ViewSet):
             return Response("Dislike has been added")
     
 
-class ReplyViewSet2(viewsets.ViewSet):
+class ReplyViewSet2(viewsets.ModelViewSet):
+    queryset = Reply.objects.filter()
     serializer_class = ReplySerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,
                           IsOwnerOrReadOnly,)
+    pagination_class = CommentsPageNumberPagination
 
     def list(self, request, post_pk=None, comment_pk=None):
-        queryset = Comment.objects.filter(pk=comment_pk)
-        serializer = CommentSerializer(queryset, many=True)
+        queryset = Reply.objects.filter(parent_id=comment_pk)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context={"request":request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True, context={"request":request})
         return Response(serializer.data)
+        
+        #queryset = Comment.objects.filter(pk=comment_pk)
+        #serializer = CommentSerializer(queryset, many=True, context={"request":request})
+        #return Response(serializer.data)
     
     def create(self, request, post_pk=None, comment_pk=None):
         serializer = ReplySerializer(data=request.data)
@@ -98,7 +118,7 @@ class ReplyViewSet2(viewsets.ViewSet):
     def retrieve(self, request, pk=None, post_pk=None, comment_pk=None):
         queryset =  Reply.objects.filter(pk=pk, parent__parent=post_pk, parent_id=comment_pk)
         reply =  get_object_or_404(queryset, pk=pk)
-        serializer = ReplySerializer(reply)
+        serializer = ReplySerializer(reply, context={'request': request})
         return Response(serializer.data)
     
     def update(self, request, pk=None, post_pk=None, comment_pk=None):

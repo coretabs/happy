@@ -2,24 +2,35 @@
 from .permissions import IsOwnerOrReadOnly
 from rest_framework import viewsets
 from rest_framework.response import Response
-from rest_framework.decorators import action
-from rest_framework import permissions
-from .models import Post
-from .serializers import PostSerializer, SinglePostSerializer
-from comments.models import Comment, Reply
-from comments.serializers import CommentSerializer, ReplySerializer
-from rest_framework import status
 from django.shortcuts import get_object_or_404
 
+from rest_framework import permissions
+from rest_framework import status
+from rest_framework.decorators import action
 
-class PostViewSet2(viewsets.ViewSet):
+from .models import Post
+from .pagination import PostsLimitOffsetPagination, PostsPageNumberPagination
+from .serializers import PostSerializer, SinglePostSerializer
+
+from comments.models import Comment, Reply
+from comments.serializers import CommentSerializer, ReplySerializer
+
+
+class PostViewSet2(viewsets.ModelViewSet):
+    queryset = Post.objects.all()
     serializer_class =  PostSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,
                           IsOwnerOrReadOnly,)
+    pagination_class = PostsPageNumberPagination
 
-    def list(self, request,):
-        queryset = Post.objects.filter()
-        serializer = PostSerializer(queryset, many=True, context={"request":request})
+    def list(self, request):
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context={"request":request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True, context={"request":request})
         return Response(serializer.data)
     
     def create(self, request):
@@ -30,9 +41,8 @@ class PostViewSet2(viewsets.ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def retrieve(self, request, pk=None):
-        queryset =  Post.objects.all()
-        post =  get_object_or_404(queryset, pk=pk)
-        # post =  Post.objects.get(pk=pk)
+        queryset = self.filter_queryset(self.get_queryset())
+        post =  Post.objects.get(pk=pk)
         serializer = SinglePostSerializer(post,context={"request":request})
         return Response(serializer.data)
     

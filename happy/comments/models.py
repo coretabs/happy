@@ -17,6 +17,9 @@ class BaseComment(models.Model):
     likes = models.ManyToManyField(User, blank=True, related_name="like")
     dislikes = models.ManyToManyField(User, blank=True, related_name="dislike")
 
+    class Meta:
+       ordering = ('created',)
+
     def __str__(self):
         return self.content[:50]
 

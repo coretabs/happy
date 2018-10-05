@@ -34,6 +34,15 @@ class Post(models.Model):
                             validators=[validate_file_extension_and_size],
                             blank=True,
                             null=True)
+    class Meta: 
+        ordering =["-created"]
+
+    def likes_count(self):
+        return self.likes.count()
+
+    def dislikes_count(self):
+        return self.dislikes.count()
+    
     class Meta:
        ordering = ('-created',)
 
@@ -46,8 +55,3 @@ class Post(models.Model):
             return timesince(self.created).split(',')[0]
         return timesince(self.created)
 
-    def likes_count(self):
-        return self.likes.count()
-
-    def dislikes_count(self):
-        return self.dislikes.count()

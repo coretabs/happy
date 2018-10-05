@@ -1,6 +1,10 @@
 # from django.shortcuts import render
 from .permissions import IsOwnerOrReadOnly
 from rest_framework import viewsets
+#from django.utils import timezone
+#from datetime import timedelta
+#from django.db.models import Case , When 
+from django.db.models import Count
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 
@@ -22,6 +26,15 @@ class PostViewSet2(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,
                           IsOwnerOrReadOnly,)
     pagination_class = PostsPageNumberPagination
+
+    def get_queryset(self):
+        #now = timezone.now()
+        #date_day = timezone.now() - timedelta(hours=24) 
+
+        data = Post.objects.annotate(
+            score = (Count("likes") + Count("post_comments")) - Count("dislikes")
+            ).order_by("-score","-created")
+        return data
 
     def list(self, request):
         queryset = self.filter_queryset(self.get_queryset())

@@ -10,7 +10,7 @@ from rest_framework.decorators import action
 
 from .models import Post
 from .pagination import PostsLimitOffsetPagination, PostsPageNumberPagination
-from .serializers import PostSerializer, SinglePostSerializer
+from .serializers import PostSerializer, SinglePostSerializer, PostLikesSerializer
 
 from comments.models import Comment, Reply
 from comments.serializers import CommentSerializer, ReplySerializer
@@ -88,3 +88,15 @@ class PostViewSet2(viewsets.ModelViewSet):
                 post.likes.remove(request.user)
             post.dislikes.add(request.user)
             return Response("Dislike has been added")
+
+    @action(detail=True, methods=['get'])
+    def likes(self, request , pk=None):
+        likes = Post.objects.get(pk=pk).likes.all()
+        serializer = PostLikesSerializer(likes, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['get'])
+    def dislikes(self, request , pk=None):
+        dislikes = Post.objects.get(pk=pk).dislikes.all()
+        serializer = PostLikesSerializer(dislikes, many=True)
+        return Response(serializer.data)

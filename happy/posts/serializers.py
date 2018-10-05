@@ -6,6 +6,7 @@ from django.utils.module_loading import import_string
 from posts.pagination import CommentsPageNumberPagination, PostsPageNumberPagination
 
 from django.db.models import Count
+from django.contrib.auth.models import User
 from .models import Post
 from comments.models import Comment
 from comments.serializers import TopCommentSerializer, CommentSerializer
@@ -73,6 +74,7 @@ class PostSerializer(serializers.ModelSerializer):
 
 class SinglePostSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.username')
+    likes = serializers.StringRelatedField(many=True)
     author_avatar = serializers.SerializerMethodField()
     time_since = serializers.ReadOnlyField(source='FORMAT')
     comments_count = serializers.SerializerMethodField()
@@ -116,3 +118,17 @@ class SinglePostSerializer(serializers.ModelSerializer):
 
 
 
+class PostLikesSerializer(serializers.ModelSerializer):
+    username = serializers.ReadOnlyField()
+    avatar = serializers.SerializerMethodField()
+    class Meta:
+        model = User
+        fields = ("username","avatar")
+
+
+    def get_avatar(self, obj, size=settings.AVATAR_DEFAULT_SIZE):
+        for provider_path in settings.AVATAR_PROVIDERS:
+            provider = import_string(provider_path)
+            avatar_url = provider.get_avatar_url(obj, size)
+            if avatar_url:
+                return avatar_url

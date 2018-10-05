@@ -3,6 +3,7 @@ from posts.models import Post
 from rest_framework import serializers
 from collections import OrderedDict
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.utils.module_loading import import_string
 from posts.pagination import CommentsPageNumberPagination, PostsPageNumberPagination
 
@@ -140,5 +141,21 @@ class ReplySerializer(BaseCommentSerializer):
         for provider_path in settings.AVATAR_PROVIDERS:
             provider = import_string(provider_path)
             avatar_url = provider.get_avatar_url(obj.author, size)
+            if avatar_url:
+                return avatar_url
+
+
+class CommentLikesSerializer(serializers.ModelSerializer):
+    username = serializers.ReadOnlyField()
+    avatar = serializers.SerializerMethodField()
+    class Meta:
+        model = User
+        fields = ("username","avatar")
+
+
+    def get_avatar(self, obj, size=settings.AVATAR_DEFAULT_SIZE):
+        for provider_path in settings.AVATAR_PROVIDERS:
+            provider = import_string(provider_path)
+            avatar_url = provider.get_avatar_url(obj, size)
             if avatar_url:
                 return avatar_url

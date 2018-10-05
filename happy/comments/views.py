@@ -10,7 +10,8 @@ from .models import Comment, Reply
 from posts.pagination import CommentsPageNumberPagination, PostsPageNumberPagination
 
 
-from .serializers import CommentSerializer, CommentSerializerInsidePostInstance, ReplySerializer
+from .serializers import (CommentSerializer, CommentSerializerInsidePostInstance,
+                          ReplySerializer, CommentLikesSerializer)
 
 
 class CommentViewSet2(viewsets.ModelViewSet):
@@ -85,6 +86,18 @@ class CommentViewSet2(viewsets.ModelViewSet):
                 comment.likes.remove(request.user)
             comment.dislikes.add(request.user)
             return Response("Dislike has been added")
+    
+    @action(detail=True, methods=['get'])
+    def likes(self, request, pk=None, post_pk=None):
+        likes = Comment.objects.get(pk=pk).likes.all()
+        serializer = CommentLikesSerializer(likes, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['get'])
+    def dislikes(self, request, pk=None, post_pk=None):
+        dislikes = Comment.objects.get(pk=pk).dislikes.all()
+        serializer = CommentLikesSerializer(dislikes, many=True)
+        return Response(serializer.data)
     
 
 class ReplyViewSet2(viewsets.ModelViewSet):
@@ -163,3 +176,16 @@ class ReplyViewSet2(viewsets.ModelViewSet):
                 reply.likes.remove(request.user)
             reply.dislikes.add(request.user)
             return Response("Dislike has been added")
+    
+
+    @action(detail=True, methods=['get'])
+    def likes(self, request, pk=None, post_pk=None, comment_pk=None):
+        likes = Reply.objects.get(pk=pk).likes.all()
+        serializer = CommentLikesSerializer(likes, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['get'])
+    def dislikes(self, request, pk=None, post_pk=None, comment_pk=None):
+        dislikes = Reply.objects.get(pk=pk).dislikes.all()
+        serializer = CommentLikesSerializer(dislikes, many=True)
+        return Response(serializer.data)

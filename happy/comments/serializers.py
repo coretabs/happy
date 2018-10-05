@@ -42,11 +42,9 @@ class CommentSerializer(BaseCommentSerializer):
     class Meta:
         model = Comment
         fields = ('id','author', "author_avatar","time_since",'parent','content',
-                  'likes','dislikes','likes_count','dislikes_count','replies_count')
+                  'likes_count','dislikes_count','replies_count')
 
-        extra_kwargs = {'likes': {'read_only': True},
-                       'dislikes': {'read_only': True},
-                       'parent': {'read_only': True}}
+        extra_kwargs = {'parent': {'read_only': True}}
     
     def get_author_avatar(self, obj, size=settings.AVATAR_DEFAULT_SIZE):
         for provider_path in settings.AVATAR_PROVIDERS:
@@ -73,12 +71,10 @@ class CommentSerializerInsidePostInstance(BaseCommentSerializer):
     class Meta:
         model = Comment
         fields = ('id','author', "author_avatar","time_since",'parent','content',
-                  'likes','dislikes','likes_count','dislikes_count','replies_count',
+                  'likes_count','dislikes_count','replies_count',
                   'replies')
 
-        extra_kwargs = {'likes': {'read_only': True},
-                       'dislikes': {'read_only': True},
-                       'parent': {'read_only': True}}
+        extra_kwargs = {'parent': {'read_only': True}}
     
     def get_author_avatar(self, obj, size=settings.AVATAR_DEFAULT_SIZE):
         for provider_path in settings.AVATAR_PROVIDERS:
@@ -130,12 +126,10 @@ class ReplySerializer(BaseCommentSerializer):
 
     class Meta:
         model = Reply
-        extra_kwargs = {'likes': {'read_only': True},
-                       'dislikes': {'read_only': True},
-                       'parent': {'read_only': True}}
+        extra_kwargs = {'parent': {'read_only': True}}
         
         fields = ('id','author', "author_avatar",'content','parent',
-                  'likes','dislikes','likes_count','dislikes_count',"time_since")
+                  'likes_count','dislikes_count',"time_since")
     
     def get_author_avatar(self, obj, size=settings.AVATAR_DEFAULT_SIZE):
         for provider_path in settings.AVATAR_PROVIDERS:

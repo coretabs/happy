@@ -21,12 +21,14 @@ class PostSerializer(serializers.ModelSerializer):
     top_comment = serializers.SerializerMethodField()
     
     class Meta:
+        """
         extra_kwargs = {'likes': {'read_only': True},
                         'dislikes': {'read_only': True}
         }
+        """
         model = Post
         fields = ("id","author","author_avatar","time_since",
-                  "content","likes","dislikes","likes_count","dislikes_count",
+                  "content","likes_count","dislikes_count",
                   "mediafile","comments_count","top_comment")
 
     def get_author_avatar(self, obj, size=settings.AVATAR_DEFAULT_SIZE):
@@ -74,7 +76,7 @@ class PostSerializer(serializers.ModelSerializer):
 
 class SinglePostSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.username')
-    likes = serializers.StringRelatedField(many=True)
+    #likes = serializers.StringRelatedField(many=True)
     author_avatar = serializers.SerializerMethodField()
     time_since = serializers.ReadOnlyField(source='FORMAT')
     comments_count = serializers.SerializerMethodField()
@@ -83,12 +85,16 @@ class SinglePostSerializer(serializers.ModelSerializer):
     comments = serializers.SerializerMethodField()
     
     class Meta:
+        """
+
         extra_kwargs = {'likes': {'read_only': True},
                         'dislikes': {'read_only': True}
         }
+    
+        """
         model = Post
         fields = ("id","author", "author_avatar","time_since",
-                  "content","likes","dislikes","likes_count","dislikes_count",
+                  "content","likes_count","dislikes_count",
                   "mediafile","comments_count","comments")
 
     def validate(self,data):

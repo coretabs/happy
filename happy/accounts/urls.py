@@ -28,5 +28,6 @@ urlpatterns = [
     # path(r'registration/verify-email/', verify_email),
     # path(r'account-confirm-email/(?P<key>[-:\w]+)/$',allauthemailconfirmation),
     path(r'user/<username>/', GetUserProfile.as_view({'get': 'retrieve'})),
+    path(r'user/<username>/posts', GetUserProfile.as_view({'get': 'posts'})),
 
 ]

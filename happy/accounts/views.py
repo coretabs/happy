@@ -167,12 +167,27 @@ class FacebookLogin(SocialLoginView):
     adapter_class = FacebookOAuth2Adapter
 
 
-class GetUserProfile(viewsets.ViewSet):
-    serializer = UserDetailsSerializer
+class GetUserProfile(viewsets.ModelViewSet):
+    serializer_class = PostSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
+    queryset = User.objects.all()
+    pagination_class = PostsPageNumberPagination
 
     def retrieve(self, request, username=None):
         queryset =  User.objects.all()
         user =  get_object_or_404(queryset, username=username)        
         serializer = UserDetailsSerializer(user, context={'request': request})
+        return Response(serializer.data)
+    
+    @action(detail=False, methods= ["get"])
+    def posts(self, request, username=None):
+        queryset = self.filter_queryset(self.get_queryset())
+        user =  get_object_or_404(queryset, username=username)        
+        posts = Post.objects.filter(author_id=user.id)
+        page = self.paginate_queryset(posts)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context={"request":request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(posts, many=True, context={"request":request})
         return Response(serializer.data)

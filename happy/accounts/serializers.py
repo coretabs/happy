@@ -235,7 +235,6 @@ class ResendConfirmSerializer(serializers.Serializer):
 
 from posts.serializers import PostSerializer
 class UserDetailsSerializer(serializers.ModelSerializer):
-    posts = PostSerializer(many=True, read_only=True)
     email_status = serializers.SerializerMethodField()
     avatar_url = serializers.SerializerMethodField()
     profile = ProfileSerializer()
@@ -243,7 +242,7 @@ class UserDetailsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserModel
-        fields = ('username', 'email', 'email_status', 'profile', 'avatar', 'avatar_url', 'posts')
+        fields = ('username', 'email', 'email_status', 'profile', 'avatar', 'avatar_url')
 
     def get_email_status(self, obj):
         email_address = EmailAddress.objects.get(user=obj)

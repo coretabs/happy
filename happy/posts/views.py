@@ -80,27 +80,33 @@ class PostViewSet2(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['get'])
     def like(self, request , pk=None):
-        post = Post.objects.get(pk=pk)
-        if post.likes.filter(id=request.user.id).exists():
-            post.likes.remove(request.user)
-            return Response("Like has been removed")
-        else: 
-            if post.dislikes.filter(id=request.user.id).exists():
-                post.dislikes.remove(request.user)
-            post.likes.add(request.user)
-            return Response("Like has been added")
-    
-    @action(detail=True, methods= ["get"])
-    def dislike(self, request, pk=None):
-        post = Post.objects.get(pk=pk)
-        if post.dislikes.filter(id=request.user.id).exists():
-            post.dislikes.remove(request.user)
-            return Response("Dislike has been removed")
-        else: 
+        if not request.user.is_authenticated:
+            return Response("Authentication credentials were not provided.")
+        else:
+            post = Post.objects.get(pk=pk)
             if post.likes.filter(id=request.user.id).exists():
                 post.likes.remove(request.user)
-            post.dislikes.add(request.user)
-            return Response("Dislike has been added")
+                return Response("Like has been removed")
+            else: 
+                if post.dislikes.filter(id=request.user.id).exists():
+                    post.dislikes.remove(request.user)
+                post.likes.add(request.user)
+                return Response("Like has been added")
+
+    @action(detail=True, methods= ["get"])
+    def dislike(self, request, pk=None):
+            if not request.user.is_authenticated:
+                return Response("Authentication credentials were not provided.")
+            else:
+                post = Post.objects.get(pk=pk)
+                if post.dislikes.filter(id=request.user.id).exists():
+                    post.dislikes.remove(request.user)
+                    return Response("Dislike has been removed")
+                else: 
+                    if post.likes.filter(id=request.user.id).exists():
+                        post.likes.remove(request.user)
+                    post.dislikes.add(request.user)
+                    return Response("Dislike has been added")
 
     @action(detail=True, methods=['get'])
     def likes(self, request , pk=None):

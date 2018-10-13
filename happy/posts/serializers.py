@@ -19,6 +19,7 @@ class PostSerializer(serializers.ModelSerializer):
     likes_count = serializers.SerializerMethodField()
     dislikes_count = serializers.SerializerMethodField()
     top_comment = serializers.SerializerMethodField()
+    reaction = serializers.SerializerMethodField()
     
     class Meta:
         """
@@ -28,7 +29,7 @@ class PostSerializer(serializers.ModelSerializer):
         """
         model = Post
         fields = ("id","author","author_avatar","time_since",
-                  "content","likes_count","dislikes_count",
+                  "reaction","content","likes_count","dislikes_count",
                   "mediafile","comments_count","top_comment")
 
     def get_author_avatar(self, obj, size=settings.AVATAR_DEFAULT_SIZE):
@@ -44,10 +45,8 @@ class PostSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(u'at least one field is required')
         return data
 
-
     def get_comments_count(self, post):
         """ get the number of comments for single post """
-
         return Comment.objects.filter(parent=post).count()
 
     def get_top_comment(self,post):
@@ -64,7 +63,15 @@ class PostSerializer(serializers.ModelSerializer):
 
     def get_dislikes_count(self, post):
         return post.dislikes_count()
-
+    
+    def get_reaction(self, post):
+        reaction = None
+        request = self.context['request']
+        if post.likes.filter(id=request.user.id).exists():
+            reaction = 'liked'
+        elif post.dislikes.filter(id=request.user.id).exists():
+            reaction = 'disliked'
+        return reaction
 
 """    def to_representation(self, instance):
         ret = super(PostSerializer, self).to_representation(instance)
@@ -82,6 +89,7 @@ class SinglePostSerializer(serializers.ModelSerializer):
     comments_count = serializers.SerializerMethodField()
     likes_count = serializers.ReadOnlyField()
     dislikes_count = serializers.ReadOnlyField()
+    reaction = serializers.SerializerMethodField()
     # comments = serializers.SerializerMethodField()
     
     class Meta:
@@ -93,7 +101,7 @@ class SinglePostSerializer(serializers.ModelSerializer):
     
         """
         model = Post
-        fields = ("id","author", "author_avatar","time_since",
+        fields = ("id","author", "author_avatar","time_since","reaction",
                   "content","likes_count","dislikes_count",
                   "mediafile","comments_count")
 
@@ -121,6 +129,15 @@ class SinglePostSerializer(serializers.ModelSerializer):
         page = paginator.paginate_queryset(data, self.context['request'])
         serializer = CommentSerializer(page, many=True).data
         return paginator.get_paginated_response(serializer).data"""
+    
+    def get_reaction(self, post):
+        reaction = None
+        request = self.context['request']
+        if post.likes.filter(id=request.user.id).exists():
+            reaction = 'liked'
+        elif post.dislikes.filter(id=request.user.id).exists():
+            reaction = 'disliked'
+        return reaction
 
 
 class PostLikesSerializer(serializers.ModelSerializer):

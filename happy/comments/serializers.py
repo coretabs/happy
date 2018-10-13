@@ -18,7 +18,6 @@ class BaseCommentSerializer(serializers.ModelSerializer):
         model = BaseComment
    
 class TopReplySerializer(BaseCommentSerializer):
-    # replies_count = serializers.SerializerMethodField()
     author = serializers.ReadOnlyField(source='author.username')
     author_avatar = serializers.SerializerMethodField()
     time_since = serializers.ReadOnlyField(source='FORMAT')
@@ -27,7 +26,8 @@ class TopReplySerializer(BaseCommentSerializer):
     
     class Meta:
         model = Reply
-        fields = ('id','author', "author_avatar",'content', "time_since",'likes_count', 'dislikes_count')
+        fields = ('id','author', "author_avatar",'content', "time_since",
+                  'likes_count', 'dislikes_count')
     
     def get_author_avatar(self, obj, size=settings.AVATAR_DEFAULT_SIZE):
         for provider_path in settings.AVATAR_PROVIDERS:
@@ -35,6 +35,7 @@ class TopReplySerializer(BaseCommentSerializer):
             avatar_url = provider.get_avatar_url(obj.author, size)
             if avatar_url:
                 return avatar_url
+
 
 class CommentSerializer(BaseCommentSerializer):
     author = serializers.ReadOnlyField(source='author.username')
@@ -44,14 +45,16 @@ class CommentSerializer(BaseCommentSerializer):
     dislikes_count = serializers.ReadOnlyField()
     replies_count = serializers.SerializerMethodField()
     top_reply = serializers.SerializerMethodField()
+    reaction = serializers.SerializerMethodField()
     
 
     class Meta:
         model = Comment
-        fields = ('id','author', "author_avatar","time_since",'parent','content',
+        fields = ('id','author', "author_avatar","time_since", 'reaction','parent','content',
                   'likes_count','dislikes_count','replies_count', 'top_reply')
 
-        extra_kwargs = {'parent': {'read_only': True}}
+        extra_kwargs = {'parent': {'read_only': True},
+                        'reaction': {'read_only': True}}
     
     def get_author_avatar(self, obj, size=settings.AVATAR_DEFAULT_SIZE):
         for provider_path in settings.AVATAR_PROVIDERS:
@@ -72,8 +75,18 @@ class CommentSerializer(BaseCommentSerializer):
             return None
         else:
             return serializer
+    
+    def get_reaction(self, comment):
+        reaction = None
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
+            if comment.likes.filter(id=request.user.id).exists():
+                reaction = 'liked'
+            elif comment.dislikes.filter(id=request.user.id).exists():
+                reaction = 'disliked'
+            return reaction
 
-        
+
 class TopCommentSerializer(BaseCommentSerializer):
     # replies_count = serializers.SerializerMethodField()
     author = serializers.ReadOnlyField(source='author.username')
@@ -102,13 +115,14 @@ class ReplySerializer(BaseCommentSerializer):
     time_since = serializers.ReadOnlyField(source='FORMAT')
     likes_count = serializers.ReadOnlyField()
     dislikes_count = serializers.ReadOnlyField()
+    reaction = serializers.SerializerMethodField()
 
     class Meta:
         model = Reply
         extra_kwargs = {'parent': {'read_only': True}}
         
         fields = ('id','author', "author_avatar",'content','parent',
-                  'likes_count','dislikes_count',"time_since")
+                  "reaction",'likes_count','dislikes_count',"time_since")
     
     def get_author_avatar(self, obj, size=settings.AVATAR_DEFAULT_SIZE):
         for provider_path in settings.AVATAR_PROVIDERS:
@@ -116,6 +130,16 @@ class ReplySerializer(BaseCommentSerializer):
             avatar_url = provider.get_avatar_url(obj.author, size)
             if avatar_url:
                 return avatar_url
+    
+    def get_reaction(self, reply):
+        reaction = None
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
+            if reply.likes.filter(id=request.user.id).exists():
+                reaction = 'liked'
+            elif reply.dislikes.filter(id=request.user.id).exists():
+                reaction = 'disliked'
+            return reaction
 
 
 class CommentLikesSerializer(serializers.ModelSerializer):

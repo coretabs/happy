@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils.module_loading import import_string
 from posts.pagination import CommentsPageNumberPagination, PostsPageNumberPagination
+from django.db.models import Count
 
 
 class BaseCommentSerializer(serializers.ModelSerializer):
@@ -16,20 +17,25 @@ class BaseCommentSerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = BaseComment
    
-""" def get_likes_count(self, comment):
-        return comment.likes_count()
+class TopReplySerializer(BaseCommentSerializer):
+    # replies_count = serializers.SerializerMethodField()
+    author = serializers.ReadOnlyField(source='author.username')
+    author_avatar = serializers.SerializerMethodField()
+    time_since = serializers.ReadOnlyField(source='FORMAT')
+    likes_count = serializers.ReadOnlyField()
+    dislikes_count = serializers.ReadOnlyField()
+    
+    class Meta:
+        model = Reply
+        fields = ('id','author', "author_avatar",'content', "time_since",'likes_count', 'dislikes_count')
+    
+    def get_author_avatar(self, obj, size=settings.AVATAR_DEFAULT_SIZE):
+        for provider_path in settings.AVATAR_PROVIDERS:
+            provider = import_string(provider_path)
+            avatar_url = provider.get_avatar_url(obj.author, size)
+            if avatar_url:
+                return avatar_url
 
-    def get_dislikes_count(self, comment):
-        return comment.dislikes_count()
-"""
-"""
-    def to_representation(self, instance):
-        ret = super(BaseCommentSerializer, self).to_representation(instance)
-        # Here we filter the null values and creates a new dictionary
-        # We use OrderedDict like in original method
-        ret = OrderedDict(list(filter(lambda x: x[1], ret.items())))
-        return ret
-        """
 class CommentSerializer(BaseCommentSerializer):
     author = serializers.ReadOnlyField(source='author.username')
     author_avatar = serializers.SerializerMethodField()
@@ -37,12 +43,13 @@ class CommentSerializer(BaseCommentSerializer):
     likes_count = serializers.ReadOnlyField()
     dislikes_count = serializers.ReadOnlyField()
     replies_count = serializers.SerializerMethodField()
+    top_reply = serializers.SerializerMethodField()
     
 
     class Meta:
         model = Comment
         fields = ('id','author', "author_avatar","time_since",'parent','content',
-                  'likes_count','dislikes_count','replies_count')
+                  'likes_count','dislikes_count','replies_count', 'top_reply')
 
         extra_kwargs = {'parent': {'read_only': True}}
     
@@ -56,43 +63,15 @@ class CommentSerializer(BaseCommentSerializer):
     def get_replies_count(self, comment):
         """ get the number of replies for single comment """
         return Reply.objects.filter(parent=comment).count()
-
-
-class CommentSerializerInsidePostInstance(BaseCommentSerializer):
-    author = serializers.ReadOnlyField(source='author.username')
-    author_avatar = serializers.SerializerMethodField()
-    time_since = serializers.ReadOnlyField(source='FORMAT')
-    likes_count = serializers.ReadOnlyField()
-    dislikes_count = serializers.ReadOnlyField()
-    replies_count = serializers.SerializerMethodField()
-    replies = serializers.SerializerMethodField()
     
-
-    class Meta:
-        model = Comment
-        fields = ('id','author', "author_avatar","time_since",'parent','content',
-                  'likes_count','dislikes_count','replies_count',
-                  'replies')
-
-        extra_kwargs = {'parent': {'read_only': True}}
-    
-    def get_author_avatar(self, obj, size=settings.AVATAR_DEFAULT_SIZE):
-        for provider_path in settings.AVATAR_PROVIDERS:
-            provider = import_string(provider_path)
-            avatar_url = provider.get_avatar_url(obj.author, size)
-            if avatar_url:
-                return avatar_url
-    
-    def get_replies_count(self, comment):
-        """ get the number of replies for single comment """
-        return Reply.objects.filter(parent=comment).count()
-
-    def get_replies(self, instance):
-        data = Reply.objects.filter(parent=instance)
-        paginator = CommentsPageNumberPagination()
-        page = paginator.paginate_queryset(data, self.context['request'])
-        serializer = ReplySerializer(page, many=True).data
-        return paginator.get_paginated_response(serializer).data
+    def get_top_reply(self,comment):
+        data = Reply.objects.filter(parent=comment).annotate(
+            like_count=Count('likes')).order_by('-like_count').first()
+        serializer = TopReplySerializer(data).data
+        if data == None:
+            return None
+        else:
+            return serializer
 
         
 class TopCommentSerializer(BaseCommentSerializer):

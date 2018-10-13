@@ -82,7 +82,7 @@ class SinglePostSerializer(serializers.ModelSerializer):
     comments_count = serializers.SerializerMethodField()
     likes_count = serializers.ReadOnlyField()
     dislikes_count = serializers.ReadOnlyField()
-    comments = serializers.SerializerMethodField()
+    # comments = serializers.SerializerMethodField()
     
     class Meta:
         """
@@ -95,7 +95,7 @@ class SinglePostSerializer(serializers.ModelSerializer):
         model = Post
         fields = ("id","author", "author_avatar","time_since",
                   "content","likes_count","dislikes_count",
-                  "mediafile","comments_count","comments")
+                  "mediafile","comments_count")
 
     def validate(self,data):
         null = None
@@ -114,14 +114,13 @@ class SinglePostSerializer(serializers.ModelSerializer):
         """ get the number of comments for single post """
         return Comment.objects.filter(parent=post).count()
 
-    def get_comments(self, post):
+    """ def get_comments(self, post):
         
         data = Comment.objects.filter(parent=post)
         paginator = CommentsPageNumberPagination()
         page = paginator.paginate_queryset(data, self.context['request'])
         serializer = CommentSerializer(page, many=True).data
-        return paginator.get_paginated_response(serializer).data
-
+        return paginator.get_paginated_response(serializer).data"""
 
 
 class PostLikesSerializer(serializers.ModelSerializer):

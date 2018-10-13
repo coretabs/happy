@@ -10,7 +10,7 @@ from .models import Comment, Reply
 from posts.pagination import CommentsPageNumberPagination, PostsPageNumberPagination
 
 
-from .serializers import (CommentSerializer, CommentSerializerInsidePostInstance,
+from .serializers import (CommentSerializer,
                           ReplySerializer, CommentLikesSerializer)
 
 
@@ -41,7 +41,7 @@ class CommentViewSet2(viewsets.ModelViewSet):
     def retrieve(self, request, pk=None, post_pk=None):
         queryset =  Comment.objects.filter()
         comment =  get_object_or_404(queryset, pk=pk)
-        serializer = CommentSerializerInsidePostInstance(comment, context={"request":request})
+        serializer = CommentSerializer(comment, context={"request":request})
         return Response(serializer.data)
     
     def update(self, request, pk=None, post_pk=None):

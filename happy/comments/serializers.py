@@ -9,25 +9,26 @@ from posts.pagination import CommentsPageNumberPagination, PostsPageNumberPagina
 from django.db.models import Count
 
 
-class BaseCommentSerializer(serializers.ModelSerializer):
+""" class BaseCommentSerializer(serializers.ModelSerializer):
    # likes_count = serializers.SerializerMethodField()
    # dislikes_count = serializers.SerializerMethodField()
     
     class Meta:
         fields = '__all__'
-        model = BaseComment
+        model = BaseComment """
    
-class TopReplySerializer(BaseCommentSerializer):
+class TopReplySerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.username')
     author_avatar = serializers.SerializerMethodField()
     time_since = serializers.ReadOnlyField(source='FORMAT')
     likes_count = serializers.ReadOnlyField()
     dislikes_count = serializers.ReadOnlyField()
+    reaction = serializers.SerializerMethodField()
     
     class Meta:
         model = Reply
-        fields = ('id','author', "author_avatar",'content', "time_since",
-                  'likes_count', 'dislikes_count')
+        fields = ('id','author', "author_avatar",'content', 'reaction', 
+                  "time_since",'likes_count', 'dislikes_count')
     
     def get_author_avatar(self, obj, size=settings.AVATAR_DEFAULT_SIZE):
         for provider_path in settings.AVATAR_PROVIDERS:
@@ -35,9 +36,19 @@ class TopReplySerializer(BaseCommentSerializer):
             avatar_url = provider.get_avatar_url(obj.author, size)
             if avatar_url:
                 return avatar_url
+    
+    def get_reaction(self, reply):
+        reaction = None
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
+            if reply.likes.filter(id=request.user.id).exists():
+                reaction = 'liked'
+            elif reply.dislikes.filter(id=request.user.id).exists():
+                reaction = 'disliked'
+            return reaction
 
 
-class CommentSerializer(BaseCommentSerializer):
+class CommentSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.username')
     author_avatar = serializers.SerializerMethodField()
     time_since = serializers.ReadOnlyField(source='FORMAT')
@@ -53,8 +64,7 @@ class CommentSerializer(BaseCommentSerializer):
         fields = ('id','author', "author_avatar","time_since", 'reaction','parent','content',
                   'likes_count','dislikes_count','replies_count', 'top_reply')
 
-        extra_kwargs = {'parent': {'read_only': True},
-                        'reaction': {'read_only': True}}
+        extra_kwargs = {'parent': {'read_only': True}}
     
     def get_author_avatar(self, obj, size=settings.AVATAR_DEFAULT_SIZE):
         for provider_path in settings.AVATAR_PROVIDERS:
@@ -68,9 +78,10 @@ class CommentSerializer(BaseCommentSerializer):
         return Reply.objects.filter(parent=comment).count()
     
     def get_top_reply(self,comment):
+        request = self.context.get("request")
         data = Reply.objects.filter(parent=comment).annotate(
             like_count=Count('likes')).order_by('-like_count').first()
-        serializer = TopReplySerializer(data).data
+        serializer = TopReplySerializer(data, context={'request': request}).data
         if data == None:
             return None
         else:
@@ -87,7 +98,7 @@ class CommentSerializer(BaseCommentSerializer):
             return reaction
 
 
-class TopCommentSerializer(BaseCommentSerializer):
+class TopCommentSerializer(serializers.ModelSerializer):
     # replies_count = serializers.SerializerMethodField()
     author = serializers.ReadOnlyField(source='author.username')
     author_avatar = serializers.SerializerMethodField()
@@ -109,7 +120,7 @@ class TopCommentSerializer(BaseCommentSerializer):
         return Reply.objects.filter(parent=comment).count()
     """
     
-class ReplySerializer(BaseCommentSerializer):
+class ReplySerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.username')
     author_avatar = serializers.SerializerMethodField()
     time_since = serializers.ReadOnlyField(source='FORMAT')

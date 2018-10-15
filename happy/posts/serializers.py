@@ -66,12 +66,13 @@ class PostSerializer(serializers.ModelSerializer):
     
     def get_reaction(self, post):
         reaction = None
-        request = self.context['request']
-        if post.likes.filter(id=request.user.id).exists():
-            reaction = 'liked'
-        elif post.dislikes.filter(id=request.user.id).exists():
-            reaction = 'disliked'
-        return reaction
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
+            if post.likes.filter(id=request.user.id).exists():
+                reaction = 'liked'
+            elif post.dislikes.filter(id=request.user.id).exists():
+                reaction = 'disliked'
+            return reaction
 
 """    def to_representation(self, instance):
         ret = super(PostSerializer, self).to_representation(instance)
@@ -132,12 +133,13 @@ class SinglePostSerializer(serializers.ModelSerializer):
     
     def get_reaction(self, post):
         reaction = None
-        request = self.context['request']
-        if post.likes.filter(id=request.user.id).exists():
-            reaction = 'liked'
-        elif post.dislikes.filter(id=request.user.id).exists():
-            reaction = 'disliked'
-        return reaction
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
+            if post.likes.filter(id=request.user.id).exists():
+                reaction = 'liked'
+            elif post.dislikes.filter(id=request.user.id).exists():
+                reaction = 'disliked'
+            return reaction
 
 
 class PostLikesSerializer(serializers.ModelSerializer):

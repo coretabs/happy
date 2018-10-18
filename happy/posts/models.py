@@ -43,9 +43,6 @@ class Post(models.Model):
     def dislikes_count(self):
         return self.dislikes.count()
     
-    class Meta:
-       ordering = ('-created',)
-
     def __str__(self):
         return self.content[:50]
 

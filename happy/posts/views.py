@@ -13,6 +13,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 
 from .models import Post
+from .filters import PostFilter
 from .pagination import PostsLimitOffsetPagination, PostsPageNumberPagination
 from .serializers import PostSerializer, SinglePostSerializer, PostLikesSerializer
 
@@ -26,6 +27,7 @@ class PostViewSet2(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,
                           IsOwnerOrReadOnly,)
     pagination_class = PostsPageNumberPagination
+    filterset_class = PostFilter
 
     def get_queryset(self):
         #now = timezone.now()

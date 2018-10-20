@@ -32,6 +32,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.urls import reverse_lazy
 
 from .models import Profile, Link
+from .filters import UserFilter
 from django.contrib.auth.models import User
 
 from .serializers import (UserSerializer,
@@ -193,29 +194,19 @@ class GetUserProfile(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-from django_filters import rest_framework as filters
-import django_filters
-from django.db.models import Q
-
-class UserFilter(filters.FilterSet):
-    username_or_email = django_filters.CharFilter(method='username_email')
-
-    class Meta:
-        model = User
-        fields = []
-    
-    def username_email(self, queryset, name, value):
-        return queryset.filter(
-           Q(username__icontains=value) | Q(email__icontains=value)
-        )
-
-
 class UsersListView(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     filterset_class = UserFilter
+    pagination_class = PostsPageNumberPagination
     
     def list(self, request):
         queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context={"request":request})
+            return self.get_paginated_response(serializer.data)
+
         serializer = self.get_serializer(queryset, many=True, context={"request":request})
         return Response(serializer.data)
+    

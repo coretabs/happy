@@ -8,7 +8,7 @@ from django.db.models import Count
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 
-from rest_framework import permissions
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework import status
 from rest_framework.decorators import action
 
@@ -19,13 +19,22 @@ from .serializers import PostSerializer, SinglePostSerializer, PostLikesSerializ
 
 from comments.models import Comment, Reply
 from comments.serializers import CommentSerializer, ReplySerializer
+from reports.serializers import PostReportSerializer
+from reports.models import PostReport
 
 
 class PostViewSet2(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class =  PostSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
+
+    def get_serializer_class(self):
+        if self.action == 'report':
+            return PostReportSerializer
+        return super(PostViewSet2, self).get_serializer_class()
+    
+    permission_classes = (IsAuthenticatedOrReadOnly,
                           IsOwnerOrReadOnly,)
+
     pagination_class = PostsPageNumberPagination
     filterset_class = PostFilter
 
@@ -54,12 +63,13 @@ class PostViewSet2(viewsets.ModelViewSet):
     
     def retrieve(self, request, pk=None):
         queryset = self.filter_queryset(self.get_queryset())
-        post =  Post.objects.get(pk=pk)
+        post =  get_object_or_404(queryset, pk=pk)
         serializer = SinglePostSerializer(post,context={"request":request})
         return Response(serializer.data)
     
     def update(self, request, pk=None):
-        post =  Post.objects.get(pk=pk)
+        queryset = self.filter_queryset(self.get_queryset())
+        post =  get_object_or_404(queryset, pk=pk)
         serializer = PostSerializer(data=request.data, instance=post)
         if serializer.is_valid():
             post = serializer.save()
@@ -68,7 +78,8 @@ class PostViewSet2(viewsets.ModelViewSet):
     
     def destroy(self, request, pk=None):
         try:
-            post =  Post.objects.get(pk=pk)
+            queryset = self.filter_queryset(self.get_queryset())
+            post =  get_object_or_404(queryset, pk=pk)
         except KeyError:
             return Response(status=status.HTTP_404_NOT_FOUND)
         except ValueError:
@@ -118,3 +129,18 @@ class PostViewSet2(viewsets.ModelViewSet):
         dislikes = Post.objects.get(pk=pk).dislikes.all()
         serializer = PostLikesSerializer(dislikes, many=True)
         return Response(serializer.data)
+
+    @action(detail=True, methods= ["post"],
+            permission_classes=(IsAuthenticatedOrReadOnly,)
+        )
+    def report(self, request, pk=None):
+        if not request.user.is_authenticated:
+            return Response("Authentication credentials were not provided.")
+        else:
+            post = Post.objects.get(pk=pk)
+            serializer = PostReportSerializer(data=request.data)
+            if serializer.is_valid():
+                #serializer.save(post_id=post.id)
+                serializer.save(reporter=self.request.user, post_id=pk)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -62,7 +62,8 @@ INSTALLED_APPS = [
     'fun',
     'accounts',
     'posts',
-    'comments'
+    'comments',
+    'reports'
 ]
 
 

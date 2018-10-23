@@ -19,12 +19,14 @@ from django.views.generic import TemplateView
 
 from rest_framework import routers
 from accounts.views import UserSocialLinksViewSet
+from reports.views import PostReportViewSet
 
 
 # from fun.routers import router
 
 router = routers.DefaultRouter()
 router.register('social', UserSocialLinksViewSet)
+router.register('reports', PostReportViewSet)
 
 
 urlpatterns = [
@@ -42,6 +44,7 @@ urlpatterns = [
     path(r'avatar/', include('avatar.urls')),
     
     path(r'api/v1/', include('posts.urls')),
+    #path(r'api/v1/reports', include('reports.urls')),
 
 ]
 

@@ -167,7 +167,7 @@ class PostReportListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model= Post
-        fields = ('id', 'reports_count', 'url')
+        fields = ('id', 'reports_count', 'url',)
 
     def get_reports_count(self,post):
         return post.reports.count()

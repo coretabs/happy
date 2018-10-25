@@ -156,3 +156,10 @@ class PostReportViewSet(viewsets.ViewSet):
                ).order_by('-reports_count')
         serializer = PostReportListSerializer(queryset, many=True, context={"request":request})
         return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        queryset = Post.objects.all()
+        post = get_object_or_404(queryset,pk=pk)
+        reports = post.reports.all()
+        serializer = PostReportSerializer(reports, many=True, context={"request":request})
+        return Response(serializer.data)

@@ -15,7 +15,8 @@ from rest_framework.decorators import action
 from .models import Post
 from .filters import PostFilter
 from .pagination import PostsLimitOffsetPagination, PostsPageNumberPagination
-from .serializers import PostSerializer, SinglePostSerializer, PostLikesSerializer
+from .serializers import (PostSerializer, SinglePostSerializer, 
+                          PostLikesSerializer, PostReportListSerializer)
 
 from comments.models import Comment, Reply
 from comments.serializers import CommentSerializer, ReplySerializer
@@ -144,3 +145,14 @@ class PostViewSet2(viewsets.ModelViewSet):
                 serializer.save(reporter=self.request.user, post_id=pk)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PostReportViewSet(viewsets.ViewSet):
+    queryset = Post.objects.filter()
+
+    def list(self, request):
+        queryset = Post.objects.filter(reports__isnull=False
+               ).annotate(reports_count=Count('reports')
+               ).order_by('-reports_count')
+        serializer = PostReportListSerializer(queryset, many=True, context={"request":request})
+        return Response(serializer.data)

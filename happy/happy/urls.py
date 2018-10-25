@@ -19,7 +19,7 @@ from django.views.generic import TemplateView
 
 from rest_framework import routers
 from accounts.views import UserSocialLinksViewSet
-from reports.views import PostReportViewSet
+from posts.views import PostReportViewSet
 
 
 # from fun.routers import router
@@ -44,7 +44,6 @@ urlpatterns = [
     path(r'avatar/', include('avatar.urls')),
     
     path(r'api/v1/', include('posts.urls')),
-    #path(r'api/v1/reports', include('reports.urls')),
 
 ]
 

@@ -11,7 +11,7 @@ class PostReport(models.Model):
             ('VIOLENCE', 'violence'),
         )
     reason = models.CharField(
-            max_length=2,
+            max_length=255,
             choices=REASON,
             default= None,
         )

@@ -19,12 +19,14 @@ from django.views.generic import TemplateView
 
 from rest_framework import routers
 from accounts.views import UserSocialLinksViewSet
+from posts.views import PostReportViewSet
 
 
 # from fun.routers import router
 
 router = routers.DefaultRouter()
 router.register('social', UserSocialLinksViewSet)
+router.register('reports', PostReportViewSet)
 
 
 urlpatterns = [

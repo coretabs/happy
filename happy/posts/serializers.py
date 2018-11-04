@@ -156,3 +156,19 @@ class PostLikesSerializer(serializers.ModelSerializer):
             avatar_url = provider.get_avatar_url(obj, size)
             if avatar_url:
                 return avatar_url
+
+
+class PostReportListSerializer(serializers.ModelSerializer):
+    reports_count = serializers.SerializerMethodField()
+    url = serializers.HyperlinkedIdentityField(
+                        view_name='posts-detail',
+                        read_only=True
+                        )
+
+    class Meta:
+        model= Post
+        fields = ('id', 'reports_count', 'url',)
+
+    def get_reports_count(self,post):
+        return post.reports.count()
+    

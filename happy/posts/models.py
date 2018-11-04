@@ -44,6 +44,8 @@ class Post(models.Model):
         return self.dislikes.count()
     
     def __str__(self):
+        if self.content == "":
+            return '## Image post ##'
         return self.content[:50]
 
     def FORMAT(self):

@@ -76,13 +76,21 @@ class UserSocialLinksSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
 
-    posts = serializers.HyperlinkedRelatedField(many=True, read_only=True,
-                                                view_name='apiv1:post-detail')
+    displayed_name = serializers.ReadOnlyField(source='profile.displayed_name')
+    avatar_url = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ('username', 'email', 'password', 'posts')
-        extra_kwargs = {'password': {'write_only': True},
-                        'posts': {'read_only': True}}
+        fields = ('username', 'email', 'displayed_name', 'avatar_url')
+        #extra_kwargs = {'password': {'write_only': True}}
+    
+    def get_avatar_url(self, obj, size=settings.AVATAR_DEFAULT_SIZE):
+        for provider_path in settings.AVATAR_PROVIDERS:
+            provider = import_string(provider_path)
+            avatar_url = provider.get_avatar_url(obj, size)
+            if avatar_url:
+                return self.context['request'].build_absolute_uri(avatar_url)
+
 
 class RegisterSerializer(serializers.Serializer):
     email = serializers.EmailField(required=allauth_settings.EMAIL_REQUIRED)

@@ -35,6 +35,7 @@ class Link(models.Model):
             ('FB','Facebook'),
             ('IG','Instagram'),
             ('YT','Youtube'),
+            ('TW','Twitter'),
         )
     social_app = models.CharField(
             max_length=2,

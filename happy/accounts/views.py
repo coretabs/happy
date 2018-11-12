@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404
 from posts.serializers import PostSerializer
 from posts.models import Post
 from posts.pagination import PostsLimitOffsetPagination, PostsPageNumberPagination
+from rest_framework import serializers
 
 
 # from rest_framework import permissions
@@ -58,23 +59,26 @@ class UserSocialLinksViewSet(viewsets.ModelViewSet):
                          IsOwnerOrReadOnlyUser, )
     
     def get_queryset(self):
-        return Link.objects.filter(user_id=self.request.user.profile.id)
+        user = self.request.user
+        return Link.objects.filter(user_id=user.profile.id)
 
-    def perform_create(self, serializer):
-        if serializer.is_valid(raise_exception=True):
-            if Link.objects.filter(social_app=self.request.data["social_app"], 
+    def create(self, request):
+        links_count = Link.objects.filter(user_id= self.request.user.profile.id).count()
+        links_to_create = []
+        for link in request.data:
+            if not 'id' in link:
+                if not Link.objects.filter(social_app=link["social_app"],
                                     user_id= self.request.user.profile.id).exists():
-                raise serializers.ValidationError("Link already exists")
+                    if links_count < 4 and (links_count + len(links_to_create) < 4):
+                        links_to_create.append(link)
+            else:
+                self.queryset.filter(id=link['id']).update(social_app=link['social_app'], 
+                                                           social_link=link['social_link'])
+        serializer = UserSocialLinksSerializer(data=links_to_create, many=True)
+        if serializer.is_valid(raise_exception=True):
             serializer.save(user=self.request.user.profile)
-            return Response(serializer.data,status=status.HTTP_200_OK)
-        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-
-    def retrieve(self, request, pk=None):
-        # queryset =  Post.objects.filter()
-        # post =  get_object_or_404(queryset, pk=pk)
-        link =  get_object_or_404(Link.objects.all(), pk=pk)
-        serializer = UserSocialLinksSerializer(link)
-        return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UserPostsView(generics.ListAPIView):
     serializer_class = PostSerializer
@@ -84,8 +88,6 @@ class UserPostsView(generics.ListAPIView):
         user = self.request.user
         posts = Post.objects.filter(author_id=user.id)
         return posts
-    
-    
 
 
 class UserDetailsView(RetrieveUpdateAPIView):

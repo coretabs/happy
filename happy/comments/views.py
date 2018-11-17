@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import permissions
 from .permissions import IsOwnerOrReadOnly
 from rest_framework import status
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, get_list_or_404
 
 from .models import Comment, Reply
 from posts.pagination import CommentsPageNumberPagination, PostsPageNumberPagination
@@ -22,13 +22,14 @@ class CommentViewSet2(viewsets.ModelViewSet):
     pagination_class = PostsPageNumberPagination
 
     def list(self, request, post_pk=None):
-        queryset = Comment.objects.filter(parent_id=post_pk)
-        page = self.paginate_queryset(queryset)
+        queryset = Comment.objects.filter()
+        comments =  get_list_or_404(queryset, parent_id=post_pk)
+        page = self.paginate_queryset(comments)
         if page is not None:
             serializer = self.get_serializer(page, many=True, context={"request":request})
             return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(queryset, many=True, context={"request":request})
+        serializer = self.get_serializer(comments, many=True, context={"request":request})
         return Response(serializer.data)
     
     def create(self, request, post_pk=None):
@@ -114,13 +115,14 @@ class ReplyViewSet2(viewsets.ModelViewSet):
     pagination_class = CommentsPageNumberPagination
 
     def list(self, request, post_pk=None, comment_pk=None):
-        queryset = Reply.objects.filter(parent_id=comment_pk)
-        page = self.paginate_queryset(queryset)
+        queryset = Reply.objects.filter()
+        replies =  get_list_or_404(queryset, parent_id=comment_pk)
+        page = self.paginate_queryset(replies)
         if page is not None:
             serializer = self.get_serializer(page, many=True, context={"request":request})
             return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(queryset, many=True, context={"request":request})
+        serializer = self.get_serializer(replies, many=True, context={"request":request})
         return Response(serializer.data)
         
         #queryset = Comment.objects.filter(pk=comment_pk)

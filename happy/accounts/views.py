@@ -52,33 +52,17 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         profile = Profile.objects.get(id=user.id)
         return profile
 
-class UserSocialLinksViewSet(viewsets.ModelViewSet):
+class UserSocialLinksViewSet(generics.RetrieveUpdateAPIView):
     queryset = Link.objects.all()
     serializer_class = UserSocialLinksSerializer
     permission_classes = (IsAuthenticated,
                          IsOwnerOrReadOnlyUser, )
-    
-    def get_queryset(self):
+    def get_object(self):
         user = self.request.user
-        return Link.objects.filter(user_id=user.profile.id)
-
-    def create(self, request):
-        links_count = Link.objects.filter(user_id= self.request.user.profile.id).count()
-        links_to_create = []
-        for link in request.data:
-            if not 'id' in link:
-                if not Link.objects.filter(social_app=link["social_app"],
-                                    user_id= self.request.user.profile.id).exists():
-                    if links_count < 4 and (links_count + len(links_to_create) < 4):
-                        links_to_create.append(link)
-            else:
-                self.queryset.filter(id=link['id']).update(social_app=link['social_app'], 
-                                                           social_link=link['social_link'])
-        serializer = UserSocialLinksSerializer(data=links_to_create, many=True)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save(user=self.request.user.profile)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        profile = Profile.objects.get(user_id=user.id)
+        links = Link.objects.get(user_id=profile.id)
+        return links
+    
 
 class UserPostsView(generics.ListAPIView):
     serializer_class = PostSerializer

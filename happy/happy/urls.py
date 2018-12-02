@@ -25,7 +25,7 @@ from posts.views import PostReportViewSet
 # from fun.routers import router
 
 router = routers.DefaultRouter()
-router.register('social', UserSocialLinksViewSet)
+#router.register('social', UserSocialLinksViewSet)
 router.register('reports', PostReportViewSet)
 
 

@@ -12,7 +12,7 @@ from .views import (FacebookLogin,
                    resend_confirmation_view,
                    verify_email,
                    GetUserProfile,
-                   UsersListView)
+                   UsersListView, UserSocialLinksViewSet)
 
 urlpatterns = [
     path(r'', include('rest_auth.urls')),
@@ -23,6 +23,7 @@ urlpatterns = [
     path(r'user/', user_details_view),
     path(r'user/avatar/', upload_avatar_view),
     path(r'user/profile/', UserProfileView.as_view()),
+    path(r'user/links/', UserSocialLinksViewSet.as_view()),
     path(r'user/posts/', UserPostsView.as_view()),
     path(r'registration/', include('rest_auth.registration.urls')),
     path(r'confirmation/', resend_confirmation_view),

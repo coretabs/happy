@@ -30,22 +30,21 @@ def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
 
 class Link(models.Model):
-    user = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='link')
-    SOCIAL_APP = (
-            ('FB','Facebook'),
-            ('IG','Instagram'),
-            ('YT','Youtube'),
-            ('TW','Twitter'),
-        )
-    social_app = models.CharField(
-            max_length=2,
-            choices=SOCIAL_APP,
-            default= None,
-            blank= True
-        )
-    social_link = models.URLField(
-            max_length=255,
-            blank=True
-            )
+    user = models.OneToOneField(Profile, on_delete=models.CASCADE)
+    facebook = models.URLField(max_length=50, blank=True, null=True, default=None)
+    instagram = models.URLField(max_length=50, blank=True, null=True, default=None)
+    youtube = models.URLField(max_length=50, blank=True, null=True, default=None) 
+    twitter = models.URLField(max_length=50, blank=True, null=True, default=None)
+
     def __str__(self):
-        return self.social_app
+        return f"{self.user} links"
+
+@receiver(post_save, sender=Profile)
+def create_profile_links(sender, instance, created, **kwargs):
+    if created:
+        Link.objects.create(user_id=instance.id)
+
+
+@receiver(post_save, sender=Profile)
+def save_profile_links(sender, instance, **kwargs):
+    instance.link.save()

@@ -42,7 +42,9 @@ class PostViewSet2(viewsets.ModelViewSet):
     def get_queryset(self):
         #now = timezone.now()
         #date_day = timezone.now() - timedelta(hours=24) 
-        data = Post.objects.order_by("?")
+        data = Post.objects.annotate(
+            score = (Count("likes") + Count("post_comments")) - Count("dislikes")
+            ).order_by("-score","-created")
         return data
 
     def list(self, request):

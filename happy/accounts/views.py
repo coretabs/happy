@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404
 from posts.serializers import PostSerializer
 from posts.models import Post
 from posts.pagination import PostsLimitOffsetPagination, PostsPageNumberPagination
+from rest_framework import serializers
 
 
 # from rest_framework import permissions
@@ -51,30 +52,17 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         profile = Profile.objects.get(id=user.id)
         return profile
 
-class UserSocialLinksViewSet(viewsets.ModelViewSet):
+class UserSocialLinksViewSet(generics.RetrieveUpdateAPIView):
     queryset = Link.objects.all()
     serializer_class = UserSocialLinksSerializer
     permission_classes = (IsAuthenticated,
                          IsOwnerOrReadOnlyUser, )
+    def get_object(self):
+        user = self.request.user
+        profile = Profile.objects.get(user_id=user.id)
+        links = Link.objects.get(user_id=profile.id)
+        return links
     
-    def get_queryset(self):
-        return Link.objects.filter(user_id=self.request.user.profile.id)
-
-    def perform_create(self, serializer):
-        if serializer.is_valid(raise_exception=True):
-            if Link.objects.filter(social_app=self.request.data["social_app"], 
-                                    user_id= self.request.user.profile.id).exists():
-                raise serializers.ValidationError("Link already exists")
-            serializer.save(user=self.request.user.profile)
-            return Response(serializer.data,status=status.HTTP_200_OK)
-        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-
-    def retrieve(self, request, pk=None):
-        # queryset =  Post.objects.filter()
-        # post =  get_object_or_404(queryset, pk=pk)
-        link =  get_object_or_404(Link.objects.all(), pk=pk)
-        serializer = UserSocialLinksSerializer(link)
-        return Response(serializer.data)
 
 class UserPostsView(generics.ListAPIView):
     serializer_class = PostSerializer
@@ -84,8 +72,6 @@ class UserPostsView(generics.ListAPIView):
         user = self.request.user
         posts = Post.objects.filter(author_id=user.id)
         return posts
-    
-    
 
 
 class UserDetailsView(RetrieveUpdateAPIView):

@@ -27,19 +27,17 @@ from allauth.account.utils import setup_user_email
 
 UserModel = get_user_model()
 
-class ListUserSociaLinkSerializer(serializers.ModelSerializer):
+
+class UserSocialLinksSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Link
-        fields = ('social_app','social_link')
+        fields = ('facebook', 'twitter', 'youtube', 'instagram')
 
-    def to_representation(self, instance):
-        data = super(ListUserSociaLinkSerializer, self).to_representation(instance)
-        return {data["social_app"]: data["social_link"]}
 
 class ProfileSerializer(serializers.ModelSerializer):
     """a serializer for our user profile objects"""
-    link  = ListUserSociaLinkSerializer(many=True, read_only=True)
+    link  = UserSocialLinksSerializer(read_only=True)
     
     class Meta:
         model = Profile
@@ -68,11 +66,6 @@ class DisplayUserName(serializers.ModelSerializer):
         model = Profile
         fields = ('display_name',)
 
-class UserSocialLinksSerializer(serializers.ModelSerializer):
-    
-    class Meta:
-        model = Link
-        fields = ('id','social_app','social_link')
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -261,7 +254,7 @@ class UserDetailsSerializer(serializers.ModelSerializer):
             provider = import_string(provider_path)
             avatar_url = provider.get_avatar_url(obj, size)
             if avatar_url:
-                return self.context['request'].build_absolute_uri(avatar_url)
+                return avatar_url
 
     def validate_name(self, name):
         pattern = "^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ðء-ي]+[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ðء-ي]+[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ðء-ي]*$"

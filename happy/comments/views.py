@@ -22,11 +22,13 @@ class CommentViewSet2(viewsets.ModelViewSet):
     pagination_class = PostsPageNumberPagination
 
     def list(self, request, post_pk=None):
-        queryset = Comment.objects.filter()
-        comments =  get_list_or_404(queryset, parent_id=post_pk)
+        comments = Comment.objects.filter(parent_id=post_pk)
+        #comments =  get_list_or_404(queryset, parent_id=post_pk)
         page = self.paginate_queryset(comments)
         if page is not None:
             serializer = self.get_serializer(page, many=True, context={"request":request})
+            if len(page) == 0 :
+                return Response({"message": "This post has no comments"})
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(comments, many=True, context={"request":request})
@@ -115,11 +117,13 @@ class ReplyViewSet2(viewsets.ModelViewSet):
     pagination_class = CommentsPageNumberPagination
 
     def list(self, request, post_pk=None, comment_pk=None):
-        queryset = Reply.objects.filter()
-        replies =  get_list_or_404(queryset, parent_id=comment_pk)
+        replies = Reply.objects.filter(parent_id=comment_pk)
+        #replies =  get_list_or_404(queryset, parent_id=comment_pk)
         page = self.paginate_queryset(replies)
         if page is not None:
             serializer = self.get_serializer(page, many=True, context={"request":request})
+            if len(page) == 0 :
+                return Response({"message": "This comment has no replies"})
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(replies, many=True, context={"request":request})

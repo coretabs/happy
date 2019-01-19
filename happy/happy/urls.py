@@ -44,6 +44,7 @@ urlpatterns = [
     path(r'avatar/', include('avatar.urls')),
     
     path(r'api/v1/', include('posts.urls')),
+    path(r'api/v1/contact-us/', include('contact.urls')),
 
 ]
 

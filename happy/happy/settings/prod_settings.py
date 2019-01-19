@@ -73,7 +73,8 @@ INSTALLED_APPS = [
     'accounts',
     'posts',
     'comments',
-    'reports'
+    'reports',
+    'contact',
 ]
 
 
@@ -216,7 +217,7 @@ AVATAR_PROVIDERS =(
 
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 
-ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_EMAIL_VERIFICATION = 'modatory'
 
 ACCOUNT_EMAIL_REQUIRED = True
 
@@ -283,7 +284,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'coretabstchi@gmail.com'
-EMAIL_HOST_PASSWORD = 'fethitchi'
+EMAIL_HOST_PASSWORD = 'grinn-app'
 
 # JWT configuration
 JWT_AUTH = {

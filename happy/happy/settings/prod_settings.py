@@ -204,7 +204,8 @@ AUTHENTICATION_BACKENDS = (
 SITE_ID = 1
 
 #EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-#EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
+#
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
 
 # AVATAR SETTINGS
 AVATAR_CLEANUP_DELETED = True
@@ -217,7 +218,7 @@ AVATAR_PROVIDERS =(
 
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 
-ACCOUNT_EMAIL_VERIFICATION = 'modatory'
+ACCOUNT_EMAIL_VERIFICATION = 'mondatory'
 
 ACCOUNT_EMAIL_REQUIRED = True
 

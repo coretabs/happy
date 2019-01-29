@@ -280,11 +280,14 @@ REST_AUTH_REGISTER_SERIALIZERS = {
 
 # EMAIL CONFIGURATION
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = 'smtp.sendgrid.net'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'coretabstchi@gmail.com'
-EMAIL_HOST_PASSWORD = 'grinn-app'
+EMAIL_HOST_USER = 'grinn'
+EMAIL_HOST_PASSWORD = 'grinn-app2019'
+DEFAULT_FROM_EMAIL='noreply@grinn.net'
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
+
 
 # JWT configuration
 JWT_AUTH = {

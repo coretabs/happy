@@ -203,8 +203,8 @@ AUTHENTICATION_BACKENDS = (
 
 SITE_ID = 1
 
-EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
+#EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+#EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
 
 # AVATAR SETTINGS
 AVATAR_CLEANUP_DELETED = True

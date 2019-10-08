@@ -5,6 +5,7 @@ __pycache__/
 
 # db
 db.sqlite3
+
 # C extensions
 *.so
 
@@ -116,3 +117,12 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# KDE dolphin
+.directory
+
+# media files
+happy/happy/media/
+
+# Pipfile
+Pipfile

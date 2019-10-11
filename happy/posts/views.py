@@ -122,6 +122,19 @@ class PostViewSet2(viewsets.ModelViewSet):
                     return Response("Dislike has been added")
 
     @action(detail=True, methods=['get'])
+    def share(self, request, pk=None):
+        if not request.user.is_authenticated:
+            return Response("Authentication credentials were not provided.")
+        else:
+            post = Post.objects.get(pk=pk)
+            user = request.user
+            if post in user.wall.posts.all():
+                return Response("Post already on your Wall")
+            else:
+                user.wall.posts.add(post)
+            return Response("Post Shared on your Wall")
+
+    @action(detail=True, methods=['get'])
     def likes(self, request , pk=None):
         likes = Post.objects.get(pk=pk).likes.all()
         serializer = PostLikesSerializer(likes, many=True)

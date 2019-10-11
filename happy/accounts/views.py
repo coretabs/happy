@@ -169,8 +169,8 @@ class GetUserProfile(viewsets.ModelViewSet):
     @action(detail=False, methods= ["get"])
     def posts(self, request, username=None):
         queryset = self.filter_queryset(self.get_queryset())
-        user =  get_object_or_404(queryset, username=username)        
-        posts = Post.objects.filter(author_id=user.id)
+        user = get_object_or_404(queryset, username=username)
+        posts = user.wall.posts.all()
         page = self.paginate_queryset(posts)
         if page is not None:
             serializer = self.get_serializer(page, many=True, context={"request":request})

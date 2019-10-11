@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+from posts.models import Post
+
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -48,3 +50,20 @@ def create_profile_links(sender, instance, created, **kwargs):
 @receiver(post_save, sender=Profile)
 def save_profile_links(sender, instance, **kwargs):
     instance.link.save()
+
+class Wall(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    posts = models.ManyToManyField(Post, blank=True)
+
+    def __str__(self):
+        return f"{self.user} wall"
+
+@receiver(post_save, sender=User)
+def create_user_wall(sender, instance, created, **kwargs):
+    if created:
+        Wall.objects.create(user=instance)
+
+
+@receiver(post_save, sender=User)
+def save_user_wall(sender, instance, **kwargs):
+    instance.wall.save()

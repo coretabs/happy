@@ -6,8 +6,10 @@ from django.utils.dateformat import format
 from django.contrib.auth.models import User
 
 from .validators import validate_file_extension_and_size
-# from accounts.models import CustomUser as User
- 
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+
 def content_file_name(instance, filename):
     now = timezone.now()
     file_path = '{author_username}/uploads/{date}/{filename}'.format(
@@ -54,3 +56,12 @@ class Post(models.Model):
             return timesince(self.created).split(',')[0]
         return timesince(self.created)
 
+
+@receiver(post_save, sender=Post)
+def add_post_to_user_wall(sender, instance, created, **kwargs):
+    if created:
+        instance.author.wall.posts.add(instance)
+
+@receiver(post_save, sender=Post)
+def save_post_to_user_wall(sender, instance, **kwargs):
+    instance.author.wall.posts.add(instance)

@@ -36,6 +36,7 @@ class Post(models.Model):
                             validators=[validate_file_extension_and_size],
                             blank=True,
                             null=True)
+    shared = models.ForeignKey('self', blank=True, null=True, on_delete=models.CASCADE)
     class Meta: 
         ordering =["-created"]
 

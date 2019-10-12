@@ -1,6 +1,7 @@
 # from django.shortcuts import render
 from .permissions import IsOwnerOrReadOnly
 from rest_framework import viewsets
+from rest_framework import generics
 #from django.utils import timezone
 #from datetime import timedelta
 #from django.db.models import Case , When 
@@ -15,9 +16,11 @@ from rest_framework.decorators import action
 from .models import Post
 from .filters import PostFilter
 from .pagination import PostsLimitOffsetPagination, PostsPageNumberPagination
-from .serializers import (PostSerializer, SinglePostSerializer, 
-                          PostLikesSerializer, PostReportListSerializer)
-
+from .serializers import (PostSerializer, 
+                          SinglePostSerializer, 
+                          PostLikesSerializer, 
+                          PostReportListSerializer
+)
 from comments.models import Comment, Reply
 from comments.serializers import CommentSerializer, ReplySerializer
 from reports.serializers import PostReportSerializer
@@ -121,18 +124,15 @@ class PostViewSet2(viewsets.ModelViewSet):
                     post.dislikes.add(request.user)
                     return Response("Dislike has been added")
 
-    @action(detail=True, methods=['get'])
+    @action(detail=True, methods=['post'])
     def share(self, request, pk=None):
-        if not request.user.is_authenticated:
-            return Response("Authentication credentials were not provided.")
-        else:
+        if request.user.is_authenticated:
             post = Post.objects.get(pk=pk)
-            user = request.user
-            if post in user.wall.posts.all():
-                return Response("Post already on your Wall")
-            else:
-                user.wall.posts.add(post)
-            return Response("Post Shared on your Wall")
+            serializer = PostSerializer(data=request.data, context={"request": request})
+            if serializer.is_valid():
+                serializer.save(author=self.request.user, shared=post)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['get'])
     def likes(self, request , pk=None):

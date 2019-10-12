@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
 from posts.models import Post
 
 
@@ -46,10 +45,10 @@ def create_profile_links(sender, instance, created, **kwargs):
     if created:
         Link.objects.create(user_id=instance.id)
 
-
 @receiver(post_save, sender=Profile)
 def save_profile_links(sender, instance, **kwargs):
     instance.link.save()
+
 
 class Wall(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -62,7 +61,6 @@ class Wall(models.Model):
 def create_user_wall(sender, instance, created, **kwargs):
     if created:
         Wall.objects.create(user=instance)
-
 
 @receiver(post_save, sender=User)
 def save_user_wall(sender, instance, **kwargs):
